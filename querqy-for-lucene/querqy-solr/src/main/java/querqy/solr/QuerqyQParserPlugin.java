@@ -77,7 +77,7 @@ public abstract class QuerqyQParserPlugin extends QParserPlugin implements Resou
         }
 
         rewriterRequestHandlerName = name != null ? name : QuerqyRewriterRequestHandler.DEFAULT_HANDLER_NAME;
-        final Boolean skip = args.getBooleanArg(CONF_SKIP_UNKNOWN_REWRITERS);
+        final Boolean skip = (Boolean) args.get(CONF_SKIP_UNKNOWN_REWRITERS);
         skipUnknownRewriter = skip != null ? skip : false;
 
         logger.info("Initialized Querqy query parser: QuerqyRewriterRequestHandler={},skipUnknownRewriter={}",
@@ -93,7 +93,7 @@ public abstract class QuerqyQParserPlugin extends QParserPlugin implements Resou
 
         termQueryCacheName = (String) initArgs.get(CONF_CACHE_NAME);
 
-        final Boolean updateCache = initArgs.getBooleanArg(CONF_CACHE_UPDATE);
+        final Boolean updateCache = (Boolean) initArgs.get(CONF_CACHE_UPDATE);
         if (termQueryCacheName == null && updateCache != null) {
             throw new IOException("Configuration property " + CONF_CACHE_NAME + " required if " + CONF_CACHE_UPDATE +
                     " is set");
