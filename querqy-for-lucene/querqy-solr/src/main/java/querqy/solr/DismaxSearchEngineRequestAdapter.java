@@ -6,12 +6,10 @@ import static querqy.solr.QuerqyDismaxParams.*;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
-import org.apache.lucene.search.BoostQuery;
 import org.apache.lucene.search.Query;
 import org.apache.solr.common.params.AppendedSolrParams;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.MapSolrParams;
-import org.apache.solr.common.params.MultiMapSolrParams;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.schema.FieldType;
@@ -22,7 +20,6 @@ import org.apache.solr.search.DisMaxQParser;
 import org.apache.solr.search.FieldParams;
 import org.apache.solr.search.FunctionQParserPlugin;
 import org.apache.solr.search.QParser;
-import org.apache.solr.search.RankQuery;
 import org.apache.solr.search.SyntaxError;
 import org.apache.solr.util.SolrPluginUtils;
 import querqy.lucene.PhraseBoosting;
@@ -335,8 +332,8 @@ public class DismaxSearchEngineRequestAdapter implements LuceneSearchEngineReque
             }
         }
 
-        return SolrPluginUtils.setMinShouldMatch(query, minShouldMatch);
-
+        SolrPluginUtils.setMinShouldMatch(query, minShouldMatch);
+        return query;
     }
 
 
@@ -399,10 +396,11 @@ public class DismaxSearchEngineRequestAdapter implements LuceneSearchEngineReque
                         final Query fq = qParser.subQuery(bfAndBoost.getKey(), FunctionQParserPlugin.NAME).getQuery();
                         final Float b = bfAndBoost.getValue();
                         if (null != b && b != 1f) {
-                            boosts.add(new BoostQuery(fq, b));
-                        } else {
+                            fq.setBoost((b));
                             boosts.add(fq);
                         }
+                        boosts.add(fq);
+
                     } catch (final SyntaxError syntaxError) {
                         throw new SyntaxException(syntaxError);
                     }
@@ -421,22 +419,8 @@ public class DismaxSearchEngineRequestAdapter implements LuceneSearchEngineReque
 
     @Override
     public Optional<Query> parseRankQuery() throws SyntaxException {
-        Optional<String> rankQueryStringOpt = getRequestParam(QRQ);
-        if (rankQueryStringOpt.isPresent()) {
-            // see org.apache.solr.handler.component.QueryComponent#prepare
-            try {
-                Query rq = QParser.getParser(rankQueryStringOpt.get(), request).getQuery();
-                if (rq instanceof RankQuery) {
-                    return Optional.of(rq);
-                } else {
-                    throw new IllegalArgumentException(QRQ + " must be resolved to RankQuery.");
-                }
-            } catch (SyntaxError e) {
-                throw new SyntaxException(e);
-            }
-        } else {
-            return Optional.empty();
-        }
+        // Solr 4.6.1 has no RankQuery impl yet
+        return Optional.empty();
     }
 
     private List<Query> parseQueriesFromParam(final String paramName, final String defaultParserName) throws SyntaxException {
