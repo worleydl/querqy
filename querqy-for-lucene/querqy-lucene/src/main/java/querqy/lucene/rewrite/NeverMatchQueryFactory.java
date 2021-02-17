@@ -3,10 +3,8 @@
  */
 package querqy.lucene.rewrite;
 
-import java.io.IOException;
-
-import org.apache.lucene.search.MatchNoDocsQuery;
 import org.apache.lucene.search.Query;
+import querqy.lucene.backport.MatchNoDocsQuery;
 
 /**
  * @author René Kriegler, @renekrie
