@@ -1,6 +1,6 @@
 package querqy.lucene.rewrite;
 
-import org.apache.lucene.index.LeafReaderContext;
+import org.apache.lucene.index.AtomicReaderContext;
 import org.apache.lucene.queries.function.FunctionValues;
 import org.apache.lucene.queries.function.ValueSource;
 import org.apache.lucene.queries.function.docvalues.FloatDocValues;
@@ -22,14 +22,13 @@ public class AdditiveBoostFunction extends ValueSource {
 
 
     @Override
-    public FunctionValues getValues(final Map context, final LeafReaderContext readerContext) throws IOException {
-
+    public FunctionValues getValues(Map context, AtomicReaderContext readerContext) throws IOException {
         final FunctionValues scoringFunctionValues = scoringFunction.getValues(context, readerContext);
 
         return new FloatDocValues(this) {
 
             @Override
-            public float floatVal(final int doc) throws IOException {
+            public float floatVal(final int doc) {
 
                 if (!scoringFunctionValues.exists(doc)) {
                     return isNegBoost ? boostValue : 0f;
@@ -48,7 +47,7 @@ public class AdditiveBoostFunction extends ValueSource {
             }
 
             @Override
-            public String toString(int doc) throws IOException {
+            public String toString(int doc) {
                 return "AdditiveBoostFunction" + '(' + (isNegBoost ? -boostValue : boostValue)  + ',' +
                         scoringFunctionValues.toString(doc) + ')';
             }
