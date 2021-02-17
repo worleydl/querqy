@@ -7,8 +7,8 @@ import org.apache.solr.common.SolrException;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.core.SolrResourceLoader;
-import org.apache.solr.rest.ManagedResourceStorage;
 import querqy.rewrite.RewriterFactory;
+import querqy.solr.backport.ManagedResourceStorage;
 
 import java.io.File;
 import java.io.FileInputStream;

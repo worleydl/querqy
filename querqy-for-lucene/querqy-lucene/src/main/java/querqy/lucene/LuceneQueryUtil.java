@@ -1,14 +1,12 @@
 package querqy.lucene;
 
 import org.apache.lucene.queries.function.FunctionQuery;
-import org.apache.lucene.queries.function.FunctionScoreQuery;
 import org.apache.lucene.queries.function.ValueSource;
 import org.apache.lucene.queries.function.valuesource.QueryValueSource;
-import org.apache.lucene.search.BoostQuery;
-import org.apache.lucene.search.DoubleValuesSource;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.util.BytesRef;
 import querqy.LowerCaseCharSequence;
+import querqy.lucene.backport.BoostQuery;
 
 /**
  * Created by rene on 09/04/2016.
@@ -32,11 +30,14 @@ public interface LuceneQueryUtil {
                 : new QueryValueSource(query, 1.0f);
     }
 
+    /*
+        TODO: OSC BACKPORT: Might scratch this dv weren't a thing yet
     static DoubleValuesSource queryToDoubleValueSource(final Query query) {
         return (query instanceof FunctionScoreQuery)
                 ? ((FunctionScoreQuery)query).getSource()
                 : DoubleValuesSource.fromQuery(query);
     }
+    */
 
     static org.apache.lucene.index.Term toLuceneTerm(final String fieldname, final CharSequence value,
                                                             final boolean lowerCaseInput) {

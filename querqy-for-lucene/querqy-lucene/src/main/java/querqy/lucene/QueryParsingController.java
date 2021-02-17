@@ -219,8 +219,8 @@ public class QueryParsingController {
 
         if (hasOptBoost) {
 
-            final BooleanQuery.Builder builder = new BooleanQuery.Builder();
-
+            final BooleanQuery builder = new BooleanQuery();
+            BooleanClause.Occur.
             if (mainQuery instanceof MatchAllDocsQuery) {
                 builder.add(mainQuery, BooleanClause.Occur.FILTER);
             } else {
@@ -240,7 +240,7 @@ public class QueryParsingController {
                 }
             }
 
-            final BooleanQuery bq = builder.build();
+            final BooleanQuery bq = builder;
 
             if (hasMultiplicativeBoosts) {
 
@@ -398,11 +398,11 @@ public class QueryParsingController {
                         if (mustNotClauses.size() == clauses.size()) {
 
                             // boosting on purely negative query, apply negated boost on the negated query
-                            final BooleanQuery.Builder builder = new BooleanQuery.Builder();
+                            final BooleanQuery builder = new BooleanQuery;
                             builder.setMinimumNumberShouldMatch(booleanQuery.getMinimumNumberShouldMatch());
                             mustNotClauses.forEach(q -> builder.add(q.getQuery(), BooleanClause.Occur.MUST));
 
-                            queryToAdd = builder.build();
+                            queryToAdd = builder;
 
                             boost = -bq.getBoost() * factor;
                             if (boost != 1f) {
