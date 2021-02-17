@@ -220,7 +220,6 @@ public class QueryParsingController {
         if (hasOptBoost) {
 
             final BooleanQuery builder = new BooleanQuery();
-            BooleanClause.Occur.
             if (mainQuery instanceof MatchAllDocsQuery) {
                 builder.add(mainQuery, BooleanClause.Occur.FILTER);
             } else {
@@ -398,7 +397,7 @@ public class QueryParsingController {
                         if (mustNotClauses.size() == clauses.size()) {
 
                             // boosting on purely negative query, apply negated boost on the negated query
-                            final BooleanQuery builder = new BooleanQuery;
+                            final BooleanQuery builder = new BooleanQuery();
                             builder.setMinimumNumberShouldMatch(booleanQuery.getMinimumNumberShouldMatch());
                             mustNotClauses.forEach(q -> builder.add(q.getQuery(), BooleanClause.Occur.MUST));
 
