@@ -8,8 +8,8 @@ import java.util.LinkedList;
 
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
-import org.apache.lucene.search.BoostQuery;
 import org.apache.lucene.search.Query;
+import querqy.lucene.backport.BoostQuery;
 
 /**
  * @author rene
@@ -47,13 +47,13 @@ public class BooleanQueryFactory implements LuceneQueryFactory<Query> {
     public Query createQuery(final FieldBoost boost, final float dmqTieBreakerMultiplier,
                              final TermQueryBuilder termQueryBuilder) {
 
-        final BooleanQuery.Builder builder = new BooleanQuery.Builder();
+        final BooleanQuery builder = new BooleanQuery();
 
         for (final Clause clause : clauses) {
             builder.add(clause.queryFactory.createQuery(boost, dmqTieBreakerMultiplier, termQueryBuilder), clause.occur);
         }
 
-        Query bq = builder.build();
+        Query bq = builder;
 
         if (normalizeBoost) {
             int size = getNumberOfClauses();
