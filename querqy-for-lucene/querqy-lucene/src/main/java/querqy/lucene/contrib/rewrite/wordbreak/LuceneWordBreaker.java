@@ -1,6 +1,5 @@
 package querqy.lucene.contrib.rewrite.wordbreak;
 
-import org.apache.lucene.analysis.CharArraySet;
 import org.apache.lucene.index.IndexReader;
 
 import java.io.IOException;
