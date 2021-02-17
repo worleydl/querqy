@@ -4,14 +4,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.lucene.index.AtomicReaderContext;
 import org.apache.lucene.index.IndexReaderContext;
-import org.apache.lucene.index.LeafReaderContext;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.index.TermState;
-import org.apache.lucene.index.TermStates;
 import org.apache.lucene.index.Terms;
 import org.apache.lucene.index.TermsEnum;
-import org.apache.lucene.search.IndexSearcher;
+import querqy.lucene.backport.TermStates;
+
 
 /**
  * Created by rene on 10/09/2016.
@@ -45,11 +45,10 @@ public class DocumentFrequencyCorrection {
 
             states[i] = new TermStates(indexReaderContext);
 
-            for (final LeafReaderContext ctx : indexReaderContext.leaves()) {
-
+            for (final AtomicReaderContext ctx : indexReaderContext.leaves()) {
                 final Terms terms = ctx.reader().terms(term.field());
                 if (terms != null) {
-                    final TermsEnum termsEnum = terms.iterator();
+                    final TermsEnum termsEnum = terms.iterator(null);
                     if (termsEnum.seekExact(term.bytes())) {
                         final TermState termState = termsEnum.termState();
                         dfs[i] = dfs[i] + termsEnum.docFreq();
