@@ -1,9 +1,9 @@
 package querqy.lucene.contrib.rewrite.wordbreak;
 
+import org.apache.lucene.index.AtomicReaderContext;
+import org.apache.lucene.index.DocsEnum;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexReaderContext;
-import org.apache.lucene.index.LeafReaderContext;
-import org.apache.lucene.index.PostingsEnum;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.index.Terms;
 import org.apache.lucene.index.TermsEnum;
@@ -259,7 +259,7 @@ public class Collector {
 
         int count = 0;
 
-        for (final LeafReaderContext context : topReaderContext.leaves()) {
+        for (final AtomicReaderContext context : topReaderContext.leaves()) {
 
             final Terms terms1 = context.reader().terms(term1.field());
 
@@ -268,18 +268,18 @@ public class Collector {
                 final Terms terms2 = context.reader().terms(term2.field());
                 if (terms2 != null) {
 
-                    final TermsEnum termsEnum1 = terms1.iterator();
+                    final TermsEnum termsEnum1 = terms1.iterator(null);
                     if (!termsEnum1.seekExact(term1.bytes())) {
                         continue;
                     }
 
-                    final TermsEnum termsEnum2 = terms2.iterator();
+                    final TermsEnum termsEnum2 = terms2.iterator(null);
                     if (!termsEnum2.seekExact(term2.bytes())) {
                         continue;
                     }
 
-                    final PostingsEnum postings1 = termsEnum1.postings(null, PostingsEnum.NONE);
-                    final PostingsEnum postings2 = termsEnum2.postings(null, PostingsEnum.NONE);
+                    final DocsEnum postings1 = termsEnum1.docs(null, null);
+                    final DocsEnum postings2 = termsEnum2.docs(null, null);
 
                     int doc1 = postings1.nextDoc();
                     while (doc1 != DocIdSetIterator.NO_MORE_DOCS) {
