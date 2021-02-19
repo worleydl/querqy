@@ -70,15 +70,16 @@ public class SpellCheckerWordBreaker implements LuceneWordBreaker {
     }
 
     protected int countCollatedMatches(final SuggestWord[] suggestion, final IndexSearcher searcher) {
-        org.apache.lucene.search.BooleanQuery.Builder builder = new org.apache.lucene.search.BooleanQuery.Builder();
+        org.apache.lucene.search.BooleanQuery builder = new org.apache.lucene.search.BooleanQuery();
         for (final SuggestWord word : suggestion) {
             builder.add(new org.apache.lucene.search.BooleanClause(
                     new TermQuery(new org.apache.lucene.index.Term(dictionaryField, word.string)),
-                    org.apache.lucene.search.BooleanClause.Occur.FILTER));
+                    // TODO: No filter clause in Solr4, verify tests
+                    org.apache.lucene.search.BooleanClause.Occur.MUST));
         }
 
         try {
-            return searcher.count(builder.build());
+            return searcher.search(builder, 0).totalHits;
         } catch (final IOException e) {
             throw new RuntimeException(e);
         }
