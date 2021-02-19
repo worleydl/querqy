@@ -192,13 +192,13 @@ public class PhraseBoosting {
                                     }
                                     default:
 
-                                        final BooleanQuery.Builder builder = new BooleanQuery.Builder();
+                                        final BooleanQuery builder = new BooleanQuery();
 
                                         for (final Query nGramQuery : nGramQueries) {
                                             builder.add(nGramQuery, org.apache.lucene.search.BooleanClause.Occur.SHOULD);
                                         }
 
-                                        final BooleanQuery bq = builder.build();
+                                        final BooleanQuery bq = builder;
                                         disjuncts.add(LuceneQueryUtil.boost(bq, fieldParams.getBoost()));
                                 }
                             }
