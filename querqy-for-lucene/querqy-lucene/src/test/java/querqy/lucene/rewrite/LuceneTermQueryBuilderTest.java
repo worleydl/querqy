@@ -9,14 +9,15 @@ import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.Explanation;
 import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.ScoreMode;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.search.Weight;
-import org.apache.lucene.search.similarities.ClassicSimilarity;
-import org.apache.lucene.store.ByteBuffersDirectory;
+import org.apache.lucene.search.similarities.DefaultSimilarity;
+import org.apache.lucene.search.similarities.Similarity;
 import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.LuceneTestCase;
+import org.apache.lucene.util.Version;
 import org.junit.Test;
 
 public class LuceneTermQueryBuilderTest extends LuceneTestCase {
@@ -29,11 +30,11 @@ public class LuceneTermQueryBuilderTest extends LuceneTestCase {
     @Test
     public void testThatQueryUsesTermButNoFieldBoost() throws Exception {
 
-        Analyzer analyzer = new StandardAnalyzer();
+        Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_CURRENT);
 
-        Directory directory = new ByteBuffersDirectory();
+        Directory directory = new RAMDirectory();
         IndexWriterConfig config = new IndexWriterConfig(analyzer);
-        config.setSimilarity(new ClassicSimilarity());
+        config.setSimilarity(new DefaultSimilarity());
         IndexWriter indexWriter = new IndexWriter(directory, config);
 
 
@@ -44,7 +45,7 @@ public class LuceneTermQueryBuilderTest extends LuceneTestCase {
 
         IndexReader indexReader = DirectoryReader.open(directory);
         IndexSearcher indexSearcher = new IndexSearcher(indexReader);
-        indexSearcher.setSimilarity(new ClassicSimilarity());
+        indexSearcher.setSimilarity(new DefaultSimilarity());
 
 
         final TermQuery termQuery = new LuceneTermQueryBuilder()
@@ -55,7 +56,7 @@ public class LuceneTermQueryBuilderTest extends LuceneTestCase {
 
         TopDocs topDocs = indexSearcher.search(termQuery, 10);
 
-        final Weight weight = termQuery.createWeight(indexSearcher, ScoreMode.COMPLETE, 4.5f);
+        final Weight weight = termQuery.createWeight(indexSearcher);
         final Explanation explain = weight.explain(indexReader.getContext().leaves().get(0), topDocs.scoreDocs[0].doc);
 
         String explainText = explain.toString();

@@ -182,27 +182,4 @@ public class QuerqyDismaxQParser extends QParser {
     public List<Query> getFilterQueries() {
         return luceneQueries == null ? null : luceneQueries.filterQueries;
     }
-
-    public Optional<RankQuery> getRankQuery() {
-        // there are two cases this QParser returns a RankQuery here:
-        //   1) the parsed query contains boosts and querqy.solr.QuerqyDismaxParams.QBOOST_METHOD is set to "rerank", or
-        //   2) a rank query was supplied via parameter querqy.rq and there is no boosting already on the main query
-        if (luceneQueries.querqyBoostQueries != null && luceneQueries.querqyBoostQueries.size() > 0) {
-            final BooleanQuery.Builder builder = new BooleanQuery.Builder();
-
-            for (final Query q : luceneQueries.querqyBoostQueries) {
-                builder.add(q, BooleanClause.Occur.SHOULD);
-            }
-
-            return Optional.of(new QuerqyReRankQuery(new MatchAllDocsQuery(), maybeWrapQuery(builder.build()),
-                    requestAdapter.getReRankNumDocs(), 1.0));
-
-        } else if (luceneQueries.rankQuery != null && !luceneQueries.isMainQueryBoosted) {
-            // an external rank query (parsed from querqy.rq) is only applied if no querqy boost queries have been applied
-            // (either by applying them on the main query as optional clauses or by wrapping the main query in a QuerqyReRankQuery)
-            return Optional.of((RankQuery) luceneQueries.rankQuery);
-        }
-
-        return Optional.empty();
-    }
 }

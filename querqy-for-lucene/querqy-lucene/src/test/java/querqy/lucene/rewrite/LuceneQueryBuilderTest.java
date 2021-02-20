@@ -16,11 +16,10 @@ import java.util.Objects;
 import java.util.Set;
 
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.CharArraySet;
 import org.apache.lucene.analysis.core.KeywordAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.analysis.util.CharArraySet;
 import org.apache.lucene.search.BooleanClause.Occur;
-import org.apache.lucene.search.MatchNoDocsQuery;
 import org.apache.lucene.search.Query;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,6 +27,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import querqy.lucene.backport.MatchNoDocsQuery;
 import querqy.lucene.rewrite.SearchFieldsAndBoosting.FieldBoostModel;
 import querqy.model.ExpandedQuery;
 import querqy.parser.FieldAwareWhiteSpaceQuerqyParser;
@@ -133,7 +133,7 @@ public class LuceneQueryBuilderTest extends AbstractLuceneQueryTest {
        
         SearchFieldsAndBoosting searchFieldsAndBoosting = new SearchFieldsAndBoosting(FieldBoostModel.FIXED, fields,
                 fields, 0.8f);
-       
+
         LuceneQueryBuilder builder = new LuceneQueryBuilder(new DependentTermQueryBuilder(
                 new DocumentFrequencyCorrection()), new StandardAnalyzer(new CharArraySet(stopWords, true)),
                 searchFieldsAndBoosting, tie, null);
