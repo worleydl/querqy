@@ -15,6 +15,7 @@ import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.RandomIndexWriter;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.util.LuceneTestCase;
+import org.apache.lucene.util.Version;
 import org.junit.Test;
 import querqy.model.Clause;
 import querqy.model.DisjunctionMaxQuery;
@@ -34,7 +35,7 @@ public class WordBreakCompoundRewriterIndexDistributionTest extends LuceneTestCa
 
 
         final ExpandedQuery rewritten;
-        final Analyzer analyzer = new WhitespaceAnalyzer();
+        final Analyzer analyzer = new WhitespaceAnalyzer(Version.LUCENE_CURRENT);
         final Directory directory = newDirectory();
         try {
             final RandomIndexWriter writer = new RandomIndexWriter(random(), directory, analyzer);

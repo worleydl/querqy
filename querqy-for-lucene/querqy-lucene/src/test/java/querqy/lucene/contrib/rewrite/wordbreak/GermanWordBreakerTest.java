@@ -12,6 +12,7 @@ import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.RandomIndexWriter;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.util.LuceneTestCase;
+import org.apache.lucene.util.Version;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 
@@ -22,7 +23,7 @@ public class GermanWordBreakerTest extends LuceneTestCase {
 
     @Test
     public void testWithEmptyIndex() throws IOException {
-        final Analyzer analyzer = new WhitespaceAnalyzer();
+        final Analyzer analyzer = new WhitespaceAnalyzer(Version.LUCENE_CURRENT);;
 
         final Directory directory = newDirectory();
         final RandomIndexWriter indexWriter = new RandomIndexWriter(random(), directory, analyzer);
@@ -48,7 +49,7 @@ public class GermanWordBreakerTest extends LuceneTestCase {
 
     @Test
     public void testWithNoExistentDictField() throws IOException {
-        final Analyzer analyzer = new WhitespaceAnalyzer();
+        final Analyzer analyzer = new WhitespaceAnalyzer(Version.LUCENE_CURRENT);
 
         final Directory directory = newDirectory();
 
@@ -79,7 +80,7 @@ public class GermanWordBreakerTest extends LuceneTestCase {
     @Test
     public void testNoLinkingMorpheme() throws IOException {
 
-        final Analyzer analyzer = new WhitespaceAnalyzer();
+        final Analyzer analyzer = new WhitespaceAnalyzer(Version.LUCENE_CURRENT);
 
         final Directory directory = newDirectory();
         final RandomIndexWriter indexWriter = new RandomIndexWriter(random(), directory, analyzer);
@@ -112,7 +113,7 @@ public class GermanWordBreakerTest extends LuceneTestCase {
     @Test
     public void testSplitAtLinkingMorphemeE() throws IOException {
 
-        final Analyzer analyzer = new WhitespaceAnalyzer();
+        final Analyzer analyzer = new WhitespaceAnalyzer(Version.LUCENE_CURRENT);
 
         final Directory directory = newDirectory();
         final RandomIndexWriter indexWriter = new RandomIndexWriter(random(), directory, analyzer);
@@ -142,7 +143,7 @@ public class GermanWordBreakerTest extends LuceneTestCase {
     @Test
     public void testSplitAtLinkingMorphemeN() throws IOException {
 
-        final Analyzer analyzer = new WhitespaceAnalyzer();
+        final Analyzer analyzer = new WhitespaceAnalyzer(Version.LUCENE_CURRENT);
 
         final Directory directory = newDirectory();
         final RandomIndexWriter indexWriter = new RandomIndexWriter(random(), directory, analyzer);
@@ -172,7 +173,7 @@ public class GermanWordBreakerTest extends LuceneTestCase {
     @Test
     public void testSplitAtLinkingMorphemeS() throws IOException {
 
-        final Analyzer analyzer = new WhitespaceAnalyzer();
+        final Analyzer analyzer = new WhitespaceAnalyzer(Version.LUCENE_CURRENT);
 
         final Directory directory = newDirectory();
         final RandomIndexWriter indexWriter = new RandomIndexWriter(random(), directory, analyzer);
@@ -202,7 +203,7 @@ public class GermanWordBreakerTest extends LuceneTestCase {
     @Test
     public void testSingleLetterCandidateS() throws IOException {
 
-        final Analyzer analyzer = new WhitespaceAnalyzer();
+        final Analyzer analyzer = new WhitespaceAnalyzer(Version.LUCENE_CURRENT);
 
         final Directory directory = newDirectory();
         final RandomIndexWriter indexWriter = new RandomIndexWriter(random(), directory, analyzer);
@@ -235,7 +236,7 @@ public class GermanWordBreakerTest extends LuceneTestCase {
     @Test
     public void testNoLinkingMorphemeIsPreferredOverMorphemeSForSameCollationFrequency() throws IOException {
 
-        final Analyzer analyzer = new WhitespaceAnalyzer();
+        final Analyzer analyzer = new WhitespaceAnalyzer(Version.LUCENE_CURRENT);
 
         final Directory directory = newDirectory();
         final RandomIndexWriter indexWriter = new RandomIndexWriter(random(), directory, analyzer);
@@ -269,7 +270,7 @@ public class GermanWordBreakerTest extends LuceneTestCase {
     @Test
     public void testThatHighDfObservatioWeightWeighsMoreThanMorphoSyntaxPrior() throws IOException {
 
-        final Analyzer analyzer = new WhitespaceAnalyzer();
+        final Analyzer analyzer = new WhitespaceAnalyzer(Version.LUCENE_CURRENT);
 
         final Directory directory = newDirectory();
         final RandomIndexWriter indexWriter = new RandomIndexWriter(random(), directory, analyzer);
@@ -308,7 +309,7 @@ public class GermanWordBreakerTest extends LuceneTestCase {
     @Test
     public void testMinBreakSizeAtLinkingMorphemeS() throws IOException {
 
-        final Analyzer analyzer = new WhitespaceAnalyzer();
+        final Analyzer analyzer = new WhitespaceAnalyzer(Version.LUCENE_CURRENT);
 
         final Directory directory = newDirectory();
         final RandomIndexWriter indexWriter = new RandomIndexWriter(random(), directory, analyzer);
@@ -342,7 +343,7 @@ public class GermanWordBreakerTest extends LuceneTestCase {
     @Test
     public void testSplitAtLinkingMorphemeEn() throws IOException {
 
-        final Analyzer analyzer = new WhitespaceAnalyzer();
+        final Analyzer analyzer = new WhitespaceAnalyzer(Version.LUCENE_CURRENT);
 
         final Directory directory = newDirectory();
         final RandomIndexWriter indexWriter = new RandomIndexWriter(random(), directory, analyzer);
@@ -372,7 +373,7 @@ public class GermanWordBreakerTest extends LuceneTestCase {
     @Test
     public void testSplitAtLinkingMorphemeNen() throws IOException {
 
-        final Analyzer analyzer = new WhitespaceAnalyzer();
+        final Analyzer analyzer = new WhitespaceAnalyzer(Version.LUCENE_CURRENT);
 
         final Directory directory = newDirectory();
         final RandomIndexWriter indexWriter = new RandomIndexWriter(random(), directory, analyzer);
@@ -402,7 +403,7 @@ public class GermanWordBreakerTest extends LuceneTestCase {
     @Test
     public void testSplitAtLinkingMorphemeIen() throws IOException {
 
-        final Analyzer analyzer = new WhitespaceAnalyzer();
+        final Analyzer analyzer = new WhitespaceAnalyzer(Version.LUCENE_CURRENT);
 
         final Directory directory = newDirectory();
         final RandomIndexWriter indexWriter = new RandomIndexWriter(random(), directory, analyzer);
@@ -432,7 +433,7 @@ public class GermanWordBreakerTest extends LuceneTestCase {
     @Test
     public void testSplitAtLinkingMorphemeEs() throws IOException {
 
-        final Analyzer analyzer = new WhitespaceAnalyzer();
+        final Analyzer analyzer = new WhitespaceAnalyzer(Version.LUCENE_CURRENT);
 
         final Directory directory = newDirectory();
         final RandomIndexWriter indexWriter = new RandomIndexWriter(random(), directory, analyzer);
@@ -462,7 +463,7 @@ public class GermanWordBreakerTest extends LuceneTestCase {
     @Test
     public void testMinBreakSizeAtLinkingMorphemeEs() throws IOException {
 
-        final Analyzer analyzer = new WhitespaceAnalyzer();
+        final Analyzer analyzer = new WhitespaceAnalyzer(Version.LUCENE_CURRENT);;
 
         final Directory directory = newDirectory();
         final RandomIndexWriter indexWriter = new RandomIndexWriter(random(), directory, analyzer);
@@ -498,7 +499,7 @@ public class GermanWordBreakerTest extends LuceneTestCase {
     @Test
     public void testSplitAtLinkingMorphemeEr() throws IOException {
 
-        final Analyzer analyzer = new WhitespaceAnalyzer();
+        final Analyzer analyzer = new WhitespaceAnalyzer(Version.LUCENE_CURRENT);;
 
         final Directory directory = newDirectory();
         final RandomIndexWriter indexWriter = new RandomIndexWriter(random(), directory, analyzer);
@@ -528,7 +529,7 @@ public class GermanWordBreakerTest extends LuceneTestCase {
     @Test
     public void testSplitAtLinkingMorphemeUmlautEr() throws IOException {
 
-        final Analyzer analyzer = new WhitespaceAnalyzer();
+        final Analyzer analyzer = new WhitespaceAnalyzer(Version.LUCENE_CURRENT);;
 
         final Directory directory = newDirectory();
         final RandomIndexWriter indexWriter = new RandomIndexWriter(random(), directory, analyzer);
@@ -568,7 +569,7 @@ public class GermanWordBreakerTest extends LuceneTestCase {
     @Test
     public void testSplitAtLinkingMorphemeUmlautE() throws IOException {
 
-        final Analyzer analyzer = new WhitespaceAnalyzer();
+        final Analyzer analyzer = new WhitespaceAnalyzer(Version.LUCENE_CURRENT);;
 
         final Directory directory = newDirectory();
         final RandomIndexWriter indexWriter = new RandomIndexWriter(random(), directory, analyzer);
@@ -608,7 +609,7 @@ public class GermanWordBreakerTest extends LuceneTestCase {
     @Test
     public void testSplitAtLinkingMorphemeEnRemovingUs() throws IOException {
 
-        final Analyzer analyzer = new WhitespaceAnalyzer();
+        final Analyzer analyzer = new WhitespaceAnalyzer(Version.LUCENE_CURRENT);;
 
         final Directory directory = newDirectory();
         final RandomIndexWriter indexWriter = new RandomIndexWriter(random(), directory, analyzer);
@@ -638,7 +639,7 @@ public class GermanWordBreakerTest extends LuceneTestCase {
     @Test
     public void testSplitAtLinkingMorphemeEnRemovingUm() throws IOException {
 
-        final Analyzer analyzer = new WhitespaceAnalyzer();
+        final Analyzer analyzer = new WhitespaceAnalyzer(Version.LUCENE_CURRENT);;
 
         final Directory directory = newDirectory();
         final RandomIndexWriter indexWriter = new RandomIndexWriter(random(), directory, analyzer);
@@ -668,7 +669,7 @@ public class GermanWordBreakerTest extends LuceneTestCase {
     @Test
     public void testSplitAtLinkingMorphemeEnRemovingA() throws IOException {
 
-        final Analyzer analyzer = new WhitespaceAnalyzer();
+        final Analyzer analyzer = new WhitespaceAnalyzer(Version.LUCENE_CURRENT);;
 
         final Directory directory = newDirectory();
         final RandomIndexWriter indexWriter = new RandomIndexWriter(random(), directory, analyzer);
@@ -697,7 +698,7 @@ public class GermanWordBreakerTest extends LuceneTestCase {
     @Test
     public void testSplitAtLinkingMorphemeEnRemovingOnPlusEn() throws IOException {
 
-        final Analyzer analyzer = new WhitespaceAnalyzer();
+        final Analyzer analyzer = new WhitespaceAnalyzer(Version.LUCENE_CURRENT);;
 
         final Directory directory = newDirectory();
         final RandomIndexWriter indexWriter = new RandomIndexWriter(random(), directory, analyzer);
@@ -726,7 +727,7 @@ public class GermanWordBreakerTest extends LuceneTestCase {
     @Test
     public void testSplitAtLinkingMorphemeRemovingOnPlusA() throws IOException {
 
-        final Analyzer analyzer = new WhitespaceAnalyzer();
+        final Analyzer analyzer = new WhitespaceAnalyzer(Version.LUCENE_CURRENT);;
 
         final Directory directory = newDirectory();
         final RandomIndexWriter indexWriter = new RandomIndexWriter(random(), directory, analyzer);
@@ -756,7 +757,7 @@ public class GermanWordBreakerTest extends LuceneTestCase {
     @Test
     public void testSplitAtLinkingMorphemeRemovingEPlusI() throws IOException {
 
-        final Analyzer analyzer = new WhitespaceAnalyzer();
+        final Analyzer analyzer = new WhitespaceAnalyzer(Version.LUCENE_CURRENT);;
 
         final Directory directory = newDirectory();
         final RandomIndexWriter indexWriter = new RandomIndexWriter(random(), directory, analyzer);
@@ -786,7 +787,7 @@ public class GermanWordBreakerTest extends LuceneTestCase {
     @Test
     public void testSplitRemovingE() throws IOException {
 
-        final Analyzer analyzer = new WhitespaceAnalyzer();
+        final Analyzer analyzer = new WhitespaceAnalyzer(Version.LUCENE_CURRENT);;
 
         final Directory directory = newDirectory();
         final RandomIndexWriter indexWriter = new RandomIndexWriter(random(), directory, analyzer);
@@ -816,7 +817,7 @@ public class GermanWordBreakerTest extends LuceneTestCase {
     @Test
     public void testSplitRemovingEn() throws IOException {
 
-        final Analyzer analyzer = new WhitespaceAnalyzer();
+        final Analyzer analyzer = new WhitespaceAnalyzer(Version.LUCENE_CURRENT);;
 
         final Directory directory = newDirectory();
         final RandomIndexWriter indexWriter = new RandomIndexWriter(random(), directory, analyzer);
@@ -846,7 +847,7 @@ public class GermanWordBreakerTest extends LuceneTestCase {
     @Test
     public void testSplitAtLinkingMorphemeARemovingUm() throws IOException {
 
-        final Analyzer analyzer = new WhitespaceAnalyzer();
+        final Analyzer analyzer = new WhitespaceAnalyzer(Version.LUCENE_CURRENT);;
 
         final Directory directory = newDirectory();
         final RandomIndexWriter indexWriter = new RandomIndexWriter(random(), directory, analyzer);
@@ -876,7 +877,7 @@ public class GermanWordBreakerTest extends LuceneTestCase {
     //@Test
     public void xtestSpeed() throws Exception {
 
-        final Analyzer analyzer = new WhitespaceAnalyzer();
+        final Analyzer analyzer = new WhitespaceAnalyzer(Version.LUCENE_CURRENT);;
 
         final Directory directory = newDirectory();
         final RandomIndexWriter indexWriter = new RandomIndexWriter(random(), directory, analyzer);

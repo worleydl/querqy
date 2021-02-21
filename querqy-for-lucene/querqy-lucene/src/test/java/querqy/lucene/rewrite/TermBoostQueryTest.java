@@ -47,7 +47,7 @@ public class TermBoostQueryTest extends LuceneTestCase {
 
         final FieldBoostTermQueryBuilder.FieldBoostTermQuery tbq = new FieldBoostTermQueryBuilder.FieldBoostTermQuery(new Term("f1", "v1"), fieldBoost);
 
-        final Weight weight = tbq.createWeight(indexSearcher, ScoreMode.COMPLETE, 1f);
+        final Weight weight = tbq.createWeight(indexSearcher);
 
         assertTrue(weight instanceof FieldBoostTermQueryBuilder.FieldBoostTermQuery.FieldBoostWeight);
         final FieldBoostTermQueryBuilder.FieldBoostTermQuery.FieldBoostWeight tbw = (FieldBoostTermQueryBuilder.FieldBoostTermQuery.FieldBoostWeight) weight;
@@ -81,7 +81,7 @@ public class TermBoostQueryTest extends LuceneTestCase {
 
         final FieldBoostTermQueryBuilder.FieldBoostTermQuery tbq = new FieldBoostTermQueryBuilder.FieldBoostTermQuery(new Term("f1", "v1"), fieldBoost);
 
-        final Weight weight = tbq.createWeight(indexSearcher, ScoreMode.COMPLETE, externalBoostFactor);
+        final Weight weight = tbq.createWeight(indexSearcher);
 
         assertTrue(weight instanceof FieldBoostTermQueryBuilder.FieldBoostTermQuery.FieldBoostWeight);
         final FieldBoostTermQueryBuilder.FieldBoostTermQuery.FieldBoostWeight tbw = (FieldBoostTermQueryBuilder.FieldBoostTermQuery.FieldBoostWeight) weight;
@@ -108,12 +108,10 @@ public class TermBoostQueryTest extends LuceneTestCase {
 
 
         IndexReader indexReader = DirectoryReader.open(directory);
-        IndexSearcher indexSearcher = newSearcher(indexReader);
 
         final Set<Term> terms = new HashSet<>();
         final Term term = new Term("f1", "v1");
         new FieldBoostTermQueryBuilder.FieldBoostTermQuery(term, new ConstantFieldBoost(1f))
-                .createWeight(indexSearcher, ScoreMode.COMPLETE, 1f)
                 .extractTerms(terms);
 
         assertTrue(terms.contains(term));
@@ -147,11 +145,15 @@ public class TermBoostQueryTest extends LuceneTestCase {
         FieldBoostTermQueryBuilder.FieldBoostTermQuery termBoostQuery = new FieldBoostTermQueryBuilder.FieldBoostTermQuery(new Term("f1", "v1"), fieldBoost);
         indexSearcher.search(termBoostQuery, 10);
 
+        // OSC TODO: Sim.scorer() is not available in solr4
+        /*
         verify(similarity, never()).scorer(
                 ArgumentMatchers.anyFloat(),
                 ArgumentMatchers.any(CollectionStatistics.class),
                 ArgumentMatchers.<TermStatistics>any()
                 );
+
+         */
 
 
 
@@ -182,7 +184,7 @@ public class TermBoostQueryTest extends LuceneTestCase {
         FieldBoostTermQueryBuilder.FieldBoostTermQuery termBoostQuery = new FieldBoostTermQueryBuilder.FieldBoostTermQuery(new Term("f1", "v1"), fieldBoost);
         TopDocs topDocs = indexSearcher.search(termBoostQuery, 10);
 
-        assertEquals(1, topDocs.totalHits.value);
+        assertEquals(1, topDocs.totalHits);
         Document resultDoc = indexSearcher.doc(topDocs.scoreDocs[0].doc);
         assertEquals("v1", resultDoc.get("f1"));
 

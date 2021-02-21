@@ -33,7 +33,7 @@ public class LuceneTermQueryBuilderTest extends LuceneTestCase {
         Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_CURRENT);
 
         Directory directory = new RAMDirectory();
-        IndexWriterConfig config = new IndexWriterConfig(analyzer);
+        IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_CURRENT, analyzer);
         config.setSimilarity(new DefaultSimilarity());
         IndexWriter indexWriter = new IndexWriter(directory, config);
 

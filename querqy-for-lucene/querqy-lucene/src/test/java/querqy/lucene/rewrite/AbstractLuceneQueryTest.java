@@ -8,6 +8,7 @@ import org.apache.lucene.search.*;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
+import querqy.lucene.backport.BoostQuery;
 
 public class AbstractLuceneQueryTest {
 

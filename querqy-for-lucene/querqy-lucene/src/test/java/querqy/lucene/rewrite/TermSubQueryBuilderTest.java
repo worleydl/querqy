@@ -11,6 +11,7 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanClause;
+import org.apache.lucene.util.Version;
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
 import org.junit.Before;
@@ -29,7 +30,7 @@ import querqy.rewrite.commonrules.model.PositionSequence;
 
 public class TermSubQueryBuilderTest {
 
-    static final Analyzer ANALYZER = new StandardAnalyzer();
+    static final Analyzer ANALYZER = new StandardAnalyzer(Version.LUCENE_CURRENT);
 
     TermQueryCache cache = Mockito.mock(TermQueryCache.class);
 

@@ -17,10 +17,12 @@ import java.util.Set;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.core.KeywordAnalyzer;
+import org.apache.lucene.analysis.core.StopFilter;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.analysis.util.CharArraySet;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.util.Version;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -134,8 +136,9 @@ public class LuceneQueryBuilderTest extends AbstractLuceneQueryTest {
         SearchFieldsAndBoosting searchFieldsAndBoosting = new SearchFieldsAndBoosting(FieldBoostModel.FIXED, fields,
                 fields, 0.8f);
 
+        CharArraySet stopSet = StopFilter.makeStopSet(Version.LUCENE_CURRENT, stopWords.toArray(new String[stopWords.size()]));
         LuceneQueryBuilder builder = new LuceneQueryBuilder(new DependentTermQueryBuilder(
-                new DocumentFrequencyCorrection()), new StandardAnalyzer(new CharArraySet(stopWords, true)),
+                new DocumentFrequencyCorrection()), new StandardAnalyzer(Version.LUCENE_CURRENT, stopSet),
                 searchFieldsAndBoosting, tie, null);
 
         FieldAwareWhiteSpaceQuerqyParser parser = new FieldAwareWhiteSpaceQuerqyParser();
