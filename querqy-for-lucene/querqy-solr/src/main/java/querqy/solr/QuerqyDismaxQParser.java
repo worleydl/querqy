@@ -2,9 +2,6 @@ package querqy.solr;
 
 import static org.apache.solr.common.SolrException.ErrorCode.*;
 
-import org.apache.lucene.search.BooleanClause;
-import org.apache.lucene.search.BooleanQuery;
-import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.Query;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.CommonParams;
@@ -13,7 +10,6 @@ import org.apache.solr.common.util.NamedList;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.search.ExtendedQuery;
 import org.apache.solr.search.QParser;
-import org.apache.solr.search.RankQuery;
 import org.apache.solr.search.SyntaxError;
 import org.apache.solr.search.WrappedQuery;
 import querqy.lucene.LuceneQueries;
@@ -28,7 +24,6 @@ import querqy.infologging.InfoLogging;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 
 public class QuerqyDismaxQParser extends QParser {
 

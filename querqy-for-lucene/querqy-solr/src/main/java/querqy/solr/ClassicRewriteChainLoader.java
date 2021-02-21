@@ -101,7 +101,9 @@ public class ClassicRewriteChainLoader extends AbstractSolrEventListener {
                         req.setContentStreams(singleton(new ContentStreamBase.StringStream(JsonUtil.toJson(jsonBody))));
 
                         final SolrQueryResponse response = new SolrQueryResponse();
-                        requestHandler.getSubHandler(id).handleRequest(req, response);
+
+                        // TODO OSC: No getSubHandler(id) in solr4
+                        requestHandler.handleRequest(req, response);
                         if (response.getException() != null) {
                             throw new IllegalStateException("Could not upload rewriter " + id, response.getException());
                         }

@@ -24,7 +24,7 @@ public interface ClassicConfigurationParser {
         if (configuration != null) {
 
             // TODO [OSC]: Implement asShallowMap helper
-            result.put(CONF_CONFIG, configuration.asShallowMap());
+            result.put(CONF_CONFIG, configuration);
             ifNotNull(configuration.get(CONF_CLASS), v -> result.put(CONF_CLASS, v));
         }
 

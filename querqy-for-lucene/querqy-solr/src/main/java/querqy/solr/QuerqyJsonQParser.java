@@ -53,7 +53,7 @@ public class QuerqyJsonQParser extends QuerqyDismaxQParser {
     @Override
     public QueryParsingController createQueryParsingController() {
 
-        final Object solrQueryObj = req.getJSON().get(FIELD_QUERY);
+        final Object solrQueryObj = req.getParams().get(FIELD_QUERY);
         if (solrQueryObj == null) {
             throw new SolrException(BAD_REQUEST, "Solr query not defined");
         }

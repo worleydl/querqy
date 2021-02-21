@@ -143,7 +143,7 @@ public class TermQueryCachePreloader extends AbstractSolrEventListener implement
                 final Query query = termSubQueryFactory
                         .createQuery(ConstantFieldBoost.NORM_BOOST, 0.01f, new LuceneTermQueryBuilder());
                 final TopDocs topDocs = searcher.search(query, 1);
-                if (topDocs.totalHits.value < 1) {
+                if (topDocs.totalHits < 1) {
                     cache.put(new CacheKey(field, term),
                             new TermQueryCacheValue(NeverMatchQueryFactory.FACTORY, PRMSQuery.NEVER_MATCH_PRMS_QUERY));
                 }
@@ -185,7 +185,7 @@ public class TermQueryCachePreloader extends AbstractSolrEventListener implement
 
     private void configureTestForHits(final NamedList args) {
 
-        final Boolean doTest = args.getBooleanArg(CONF_TEST_FOR_HITS);
+        final Boolean doTest = (Boolean) args.get(CONF_TEST_FOR_HITS);
         testForHits = doTest != null && doTest;
 
     }

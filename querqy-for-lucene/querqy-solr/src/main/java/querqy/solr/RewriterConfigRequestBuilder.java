@@ -4,19 +4,23 @@ import static querqy.solr.QuerqyRewriterRequestHandler.ActionParam.DELETE;
 import static querqy.solr.QuerqyRewriterRequestHandler.ActionParam.GET;
 import static querqy.solr.QuerqyRewriterRequestHandler.ActionParam.SAVE;
 
-import org.apache.solr.client.solrj.SolrClient;
+import org.apache.solr.client.solrj.SolrResponse;
+import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrRequest;
+import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.request.RequestWriter;
 import org.apache.solr.client.solrj.response.SolrResponseBase;
 import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.params.MapSolrParams;
 import org.apache.solr.common.params.SolrParams;
+import org.apache.solr.common.util.ContentStream;
 import querqy.solr.utils.JsonUtil;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -101,7 +105,7 @@ public abstract class RewriterConfigRequestBuilder {
         return new ListRewriterConfigsSolrRequest(requestHandlerName);
     }
 
-    public static class SaveRewriterConfigSolrRequest extends SolrRequest<SaveRewriterConfigSolrResponse> {
+    public static class SaveRewriterConfigSolrRequest extends SolrRequest {
 
         private final String payload;
 
@@ -116,12 +120,18 @@ public abstract class RewriterConfigRequestBuilder {
             return SAVE.params();
         }
 
+        @Override
+        public Collection<ContentStream> getContentStreams() throws IOException {
+            return null;
+        }
 
         @Override
-        protected SaveRewriterConfigSolrResponse createResponse(final SolrClient client) {
+        public SolrResponse process(SolrServer solrServer) throws SolrServerException, IOException {
             return new SaveRewriterConfigSolrResponse();
         }
 
+        // TODO: These getContentWriters need their logic brought back somehow, inside of getContentStreams?
+        /*
         @Override
         public RequestWriter.ContentWriter getContentWriter(final String expectedType) {
             return new RequestWriter.ContentWriter() {
@@ -138,9 +148,10 @@ public abstract class RewriterConfigRequestBuilder {
                 }
             };
         }
+         */
     }
 
-    public static class DeleteRewriterConfigSolrRequest extends SolrRequest<DeleteRewriterConfigSolrSolrResponse> {
+    public static class DeleteRewriterConfigSolrRequest extends SolrRequest {
 
         public DeleteRewriterConfigSolrRequest(final String requestHandlerName, final String rewriterId) {
             super(SolrRequest.METHOD.POST, requestHandlerName + "/" + rewriterId);
@@ -152,13 +163,17 @@ public abstract class RewriterConfigRequestBuilder {
         }
 
         @Override
-        protected DeleteRewriterConfigSolrSolrResponse createResponse(final SolrClient client) {
-            return new DeleteRewriterConfigSolrSolrResponse();
+        public Collection<ContentStream> getContentStreams() throws IOException {
+            return null;
         }
 
+        @Override
+        public SolrResponse process(SolrServer solrServer) throws SolrServerException, IOException {
+            return new DeleteRewriterConfigSolrSolrResponse();
+        }
     }
 
-    public static class GetRewriterConfigSolrRequest extends SolrRequest<GetRewriterConfigSolrResponse> {
+    public static class GetRewriterConfigSolrRequest extends SolrRequest {
 
         public GetRewriterConfigSolrRequest(final String requestHandlerName, final String rewriterId) {
             super(SolrRequest.METHOD.GET, requestHandlerName + (rewriterId != null ? ("/" + rewriterId) : ""));
@@ -170,13 +185,17 @@ public abstract class RewriterConfigRequestBuilder {
         }
 
         @Override
-        protected GetRewriterConfigSolrResponse createResponse(final SolrClient client) {
-            return new GetRewriterConfigSolrResponse();
+        public Collection<ContentStream> getContentStreams() throws IOException {
+            return null;
         }
 
+        @Override
+        public SolrResponse process(SolrServer solrServer) throws SolrServerException, IOException {
+            return new GetRewriterConfigSolrResponse();
+        }
     }
 
-    public static class ListRewriterConfigsSolrRequest extends SolrRequest<ListRewriterConfigsSolrResponse> {
+    public static class ListRewriterConfigsSolrRequest extends SolrRequest {
 
         public ListRewriterConfigsSolrRequest(final String requestHandlerName) {
             super(SolrRequest.METHOD.GET, requestHandlerName);
@@ -188,7 +207,12 @@ public abstract class RewriterConfigRequestBuilder {
         }
 
         @Override
-        protected ListRewriterConfigsSolrResponse createResponse(final SolrClient client) {
+        public Collection<ContentStream> getContentStreams() throws IOException {
+            return null;
+        }
+
+        @Override
+        public SolrResponse process(SolrServer solrServer) throws SolrServerException, IOException {
             return new ListRewriterConfigsSolrResponse();
         }
     }

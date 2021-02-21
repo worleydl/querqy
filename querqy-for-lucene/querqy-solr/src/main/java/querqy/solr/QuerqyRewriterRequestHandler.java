@@ -13,17 +13,14 @@ import org.apache.solr.common.util.ContentStream;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.core.SolrResourceLoader;
-import org.apache.solr.handler.NestedRequestHandler;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.request.SolrRequestHandler;
 import org.apache.solr.response.SolrQueryResponse;
-import org.apache.solr.servlet.SolrRequestParsers;
 import org.apache.solr.util.plugin.SolrCoreAware;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import querqy.rewrite.RewriterFactory;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -31,7 +28,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public class QuerqyRewriterRequestHandler implements SolrRequestHandler, NestedRequestHandler, SolrCoreAware {
+public class QuerqyRewriterRequestHandler implements SolrRequestHandler, SolrCoreAware {
 
     public static final String PARAM_ACTION = "action";
 
@@ -49,8 +46,9 @@ public class QuerqyRewriterRequestHandler implements SolrRequestHandler, NestedR
 
         static Optional<ActionParam> fromRequest(final SolrQueryRequest req) {
 
+            // TODO OSC: I don't current see an easy way of accessing the HTTP method or path, may have to pass in additional params for this?
             // Solr V1 API can only handle GET and POST.
-            final String method = req.getHttpMethod();
+            final String method = "POST"; //req.getHttpMethod();
 
             final String actionString = req.getParams().get(PARAM_ACTION);
             if (actionString == null && method == null) {
@@ -164,7 +162,8 @@ public class QuerqyRewriterRequestHandler implements SolrRequestHandler, NestedR
                     final String id = entry.getKey();
                     rewriterMap.put("id", id);
                     final String queryType = req.getParams().get(CommonParams.QT);
-                    final String prefix = queryType == null ? req.getPath() : queryType;
+                    // TODO OSC: Figure out access to the request path?
+                    final String prefix = queryType == null ? "noimpl" : queryType; //req.getPath() : queryType;
                     rewriterMap.put("path", prefix.endsWith("/") ? prefix + id : prefix + "/" + id);
                     return rewriterMap;
 
@@ -180,6 +179,11 @@ public class QuerqyRewriterRequestHandler implements SolrRequestHandler, NestedR
     }
 
     @Override
+    public String getVersion() {
+        return null;
+    }
+
+    @Override
     public String getDescription() {
         return "Loads Querqy Rewriter Configs";
     }
@@ -187,6 +191,21 @@ public class QuerqyRewriterRequestHandler implements SolrRequestHandler, NestedR
     @Override
     public Category getCategory() {
         return Category.OTHER;
+    }
+
+    @Override
+    public String getSource() {
+        return null;
+    }
+
+    @Override
+    public URL[] getDocs() {
+        return new URL[0];
+    }
+
+    @Override
+    public NamedList getStatistics() {
+        return null;
     }
 
     @Override
@@ -213,70 +232,6 @@ public class QuerqyRewriterRequestHandler implements SolrRequestHandler, NestedR
         return rewriterContainer.getRewriterFactories(listener);
     }
 
-
-    @Override
-    public SolrRequestHandler getSubHandler(final String subPath) {
-        return new SolrRequestHandler() {
-            @Override
-            public void init(final NamedList args) {
-
-            }
-
-            @Override
-            public void handleRequest(final SolrQueryRequest req, final SolrQueryResponse rsp) {
-
-                final String rewriterId = subPath.charAt(0) == '/' ? subPath.substring(1) : subPath;
-
-                if (rewriterId.indexOf('/') > 0 || rewriterId.isEmpty()) {
-                    throw new SolrException(SolrException.ErrorCode.BAD_REQUEST,
-                            "Illegal rewriter ID: " + rewriterId);
-                }
-
-
-                final ActionParam action = fromRequest(req).orElse(GET);
-
-                try {
-                    switch (action) {
-                        case SAVE:
-                            doPut(req, rewriterId);
-                            break;
-                        case DELETE:
-                            rewriterContainer.deleteRewriter(rewriterId);
-                            break;
-                        case GET:
-                            final Map<String, Object> definition = rewriterContainer.readRewriterDefinition(rewriterId);
-                            final Map<String, Object> conf = new LinkedHashMap<>(3);
-                            conf.put("id", rewriterId);
-                            final String queryType = req.getParams().get(CommonParams.QT);
-                            conf.put("path", queryType == null ? req.getPath() : queryType);
-                            conf.put("definition", definition);
-                            rsp.add("rewriter", conf);
-                            break;
-                    }
-                } catch (final IOException e) {
-                    throw new RuntimeException(e);
-                }
-
-            }
-
-            @Override
-            public String getName() {
-                return QuerqyRewriterRequestHandler.class.getName() + "/" + subPath;
-            }
-
-            @Override
-            public String getDescription() {
-                return "Request handler to manage Querqy rewriter: " + subPath;
-            }
-
-            @Override
-            public Category getCategory() {
-                return Category.OTHER;
-            }
-
-        };
-
-    }
 
     public void doPut(final SolrQueryRequest req, final String rewriterId) throws IOException {
 
