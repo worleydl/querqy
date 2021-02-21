@@ -80,6 +80,7 @@ public class TermBoostQueryTest extends LuceneTestCase {
         IndexSearcher indexSearcher = newSearcher(indexReader);
 
         final FieldBoostTermQueryBuilder.FieldBoostTermQuery tbq = new FieldBoostTermQueryBuilder.FieldBoostTermQuery(new Term("f1", "v1"), fieldBoost);
+        tbq.setBoost(externalBoostFactor);
 
         final Weight weight = tbq.createWeight(indexSearcher);
 

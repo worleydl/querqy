@@ -62,8 +62,7 @@ public class FieldBoostTermQueryBuilder implements TermQueryBuilder {
                 throws IOException {
             final IndexReaderContext context = searcher.getTopReaderContext();
             final TermStates termState = TermStates.build(context, term, true);
-            // TODO: Create weight doesn't accept a boost in Solr 4....default to 1 okay?
-            return new FieldBoostWeight(termState, 1.0f, fieldBoost.getBoost(term.field(), searcher.getIndexReader()));
+            return new FieldBoostWeight(termState, getBoost(), fieldBoost.getBoost(term.field(), searcher.getIndexReader()));
         }
 
 
