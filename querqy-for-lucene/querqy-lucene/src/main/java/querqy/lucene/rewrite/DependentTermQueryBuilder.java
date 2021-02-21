@@ -132,6 +132,10 @@ public class DependentTermQueryBuilder implements TermQueryBuilder {
             if (tqIndex != other.tqIndex)
                 return false;
 
+            if (getBoost() != other.getBoost()) {
+                return false;
+            }
+
             return fieldBoost.equals(other.fieldBoost);
 
         }
@@ -190,7 +194,7 @@ public class DependentTermQueryBuilder implements TermQueryBuilder {
                 termStats = searcher.termStatistics(term, tctx);
 
 
-                if (termStats != null) {
+                if (termStats == null) {
                     this.simWeight = null;
                 } else {
                     // We've modelled field boosting in a FieldBoost implementation so that for example
@@ -280,7 +284,7 @@ public class DependentTermQueryBuilder implements TermQueryBuilder {
 
             @Override
             public float getValueForNormalization() throws IOException {
-                return 0;
+                return 1.0f;
             }
 
             @Override
@@ -307,7 +311,7 @@ public class DependentTermQueryBuilder implements TermQueryBuilder {
 
             @Override
             public float getValueForNormalization() throws IOException {
-                return 0;
+                return 1.0f;
             }
 
             @Override

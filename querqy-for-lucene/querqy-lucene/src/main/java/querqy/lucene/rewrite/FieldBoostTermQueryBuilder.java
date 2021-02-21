@@ -216,12 +216,12 @@ public class FieldBoostTermQueryBuilder implements TermQueryBuilder {
 
             @Override
             public int nextDoc() throws IOException {
-                return 0;
+                return docsEnum.nextDoc();
             }
 
             @Override
             public int advance(int i) throws IOException {
-                return 0;
+                return docsEnum.advance(i);
             }
 
             @Override
@@ -241,7 +241,7 @@ public class FieldBoostTermQueryBuilder implements TermQueryBuilder {
 
             @Override
             public int freq() throws IOException {
-                return 0;
+                return docsEnum.freq();
             }
         }
 
