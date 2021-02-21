@@ -132,7 +132,7 @@
                 <version>${maven-surefire-plugin.version}</version>
                 <configuration>
                     <systemPropertyVariables>
-                        <tests.codec>Lucene80</tests.codec>
+                        <tests.codec>Lucene40</tests.codec>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
