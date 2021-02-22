@@ -16,6 +16,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.core.KeywordAnalyzer;
 import org.apache.lucene.analysis.core.StopFilter;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -135,6 +136,7 @@ public class LuceneQueryBuilderTest extends AbstractLuceneQueryTest {
        
         SearchFieldsAndBoosting searchFieldsAndBoosting = new SearchFieldsAndBoosting(FieldBoostModel.FIXED, fields,
                 fields, 0.8f);
+
 
         CharArraySet stopSet = StopFilter.makeStopSet(Version.LUCENE_CURRENT, stopWords.toArray(new String[stopWords.size()]));
         LuceneQueryBuilder builder = new LuceneQueryBuilder(new DependentTermQueryBuilder(
@@ -383,7 +385,7 @@ public class LuceneQueryBuilderTest extends AbstractLuceneQueryTest {
    @Test
    public  void testStopWordRemoval() throws Exception {
        float tie = (float) Math.random();
-       Query q = buildWithStopWords("a stopA b", tie, "f1");
+       Query q = buildWithStopWords("a stopa b", tie, "f1");
        assertThat(q, bq(1f,
                dtq(Occur.SHOULD, 1f, "f1", "a"),
                dtq(Occur.SHOULD, 1f, "f1", "b")
@@ -393,7 +395,7 @@ public class LuceneQueryBuilderTest extends AbstractLuceneQueryTest {
    @Test
    public  void testStopWordAsSingleTermRemoval() throws Exception {
        float tie = (float) Math.random();
-       Query q = buildWithStopWords("stopA", tie, "f1", "f2");
+       Query q = buildWithStopWords("stopa", tie, "f1", "f2");
        assertTrue(q instanceof MatchNoDocsQuery);
    }
    
