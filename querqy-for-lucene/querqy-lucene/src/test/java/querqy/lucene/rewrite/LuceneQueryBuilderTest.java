@@ -76,7 +76,7 @@ public class LuceneQueryBuilderTest extends AbstractLuceneQueryTest {
         searchFields.put("f34", 3.0f);
         searchFields.put("f35", 3.0f);
 
-        stopWords = new HashSet<>(Arrays.asList("stopA", "stopB", "stopC"));
+        stopWords = new HashSet<>(Arrays.asList("stopa", "stopb", "stopc"));
 
     }
 
