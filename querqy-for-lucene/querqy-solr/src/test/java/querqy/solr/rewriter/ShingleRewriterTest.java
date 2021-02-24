@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@SolrTestCaseJ4.SuppressSSL
 public class ShingleRewriterTest extends SolrTestCaseJ4 {
 
     private final static String REWRITERS = "common_rules_before_shingles,shingles,common_rules_after_shingles";

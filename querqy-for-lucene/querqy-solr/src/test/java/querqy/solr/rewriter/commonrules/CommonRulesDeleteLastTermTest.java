@@ -9,7 +9,6 @@ import org.apache.solr.request.SolrQueryRequest;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-@SolrTestCaseJ4.SuppressSSL
 public class CommonRulesDeleteLastTermTest extends SolrTestCaseJ4 {
 
     public static void index() {

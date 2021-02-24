@@ -12,6 +12,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.solr.client.solrj.SolrClient;
+import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.Http2SolrClient;
 import org.testcontainers.containers.SolrClientUtils;
@@ -60,7 +61,7 @@ public class QuerqySolrClientUtils extends SolrClientUtils {
     }
 
     public static void createRewriters(QuerqySolrContainer solr, String collectionName) throws IOException {
-        try (final SolrClient solrClient = solr.newSolrClient()) {
+        try (final SolrServer solrClient = solr.newSolrClient()) {
 
             if (new CommonRulesConfigRequestBuilder()
                     .rules(QuerqySolrClientUtils.class.getClassLoader()

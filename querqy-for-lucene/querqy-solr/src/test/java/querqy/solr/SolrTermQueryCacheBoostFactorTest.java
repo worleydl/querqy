@@ -13,7 +13,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-@SolrTestCaseJ4.SuppressSSL
 public class SolrTermQueryCacheBoostFactorTest extends SolrTestCaseJ4 {
 
     public void index() {

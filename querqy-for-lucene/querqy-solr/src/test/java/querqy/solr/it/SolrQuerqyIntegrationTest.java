@@ -1,14 +1,11 @@
 package querqy.solr.it;
 
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-
 import java.io.IOException;
 import java.util.Random;
 
-import org.apache.solr.client.solrj.SolrClient;
+import org.apache.solr.client.solrj.SolrRequest;
+import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.impl.Http2SolrClient;
 import org.apache.solr.client.solrj.request.SolrPing;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.SolrPingResponse;
@@ -55,10 +52,11 @@ public class SolrQuerqyIntegrationTest {
 
     @Test
     public void shouldApplyQuerqyRulesForLaptop() throws SolrServerException, IOException {
-        SolrClient client = solr.newSolrClient();
+        SolrServer client = solr.newSolrClient();
 
         // container up and running
-        SolrPingResponse response = new SolrPing().process(client, QuerqySolrContainer.QUERQY_IT_COLLECTION_NAME);
+        // TODO: Figure out where to use  QuerqySolrContainer.QUERQY_IT_COLLECTION_NAME
+        SolrPingResponse response = new SolrPing().process(client);
         MatcherAssert.assertThat(response.getStatus(), Matchers.is(0));
 
         // querqy rules get applied
@@ -67,7 +65,8 @@ public class SolrQuerqyIntegrationTest {
         params.set("defType", "querqy");
         params.set(QuerqyQParserPlugin.PARAM_REWRITERS, "replace,word_break,common_rules");
         params.set(DisMaxParams.QF, "name title product_type short_description ean search_attributes");
-        QueryResponse query = client.query(QuerqySolrContainer.QUERQY_IT_COLLECTION_NAME, params);
+
+        QueryResponse query = client.query(params, SolrRequest.METHOD.POST);
         MatcherAssert.assertThat(query.getResults().getNumFound(), Matchers.is(42L));
     }
 }

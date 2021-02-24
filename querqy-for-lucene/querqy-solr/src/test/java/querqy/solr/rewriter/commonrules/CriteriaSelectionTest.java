@@ -21,7 +21,6 @@ import querqy.solr.FactoryAdapter;
 import java.util.HashMap;
 import java.util.Map;
 
-@SolrTestCaseJ4.SuppressSSL
 public class CriteriaSelectionTest extends SolrTestCaseJ4 {
 
     private static final String REWRITER_ID_1 = "rules1";

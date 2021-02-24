@@ -17,7 +17,6 @@ import java.util.Map;
 /**
  * Created by rene on 05/05/2017.
  */
-@SolrTestCaseJ4.SuppressSSL
 public class CommonRulesConfigTest extends SolrTestCaseJ4 {
 
     @BeforeClass

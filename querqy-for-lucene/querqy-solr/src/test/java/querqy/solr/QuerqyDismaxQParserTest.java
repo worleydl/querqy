@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.util.Version;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.ModifiableSolrParams;
@@ -70,7 +71,7 @@ public class QuerqyDismaxQParserTest {
     public void testSuppressCaching() throws Exception {
 
         when(request.getSchema()).thenReturn(schema);
-        when(schema.getQueryAnalyzer()).thenReturn(new StandardAnalyzer());
+        when(schema.getQueryAnalyzer()).thenReturn(new StandardAnalyzer(Version.LUCENE_CURRENT));
         when(rewriteChain.rewrite(any(), any())).thenReturn(new ExpandedQuery(new MatchAllQuery()));
 
         final ModifiableSolrParams solrParams = new ModifiableSolrParams();
@@ -91,7 +92,7 @@ public class QuerqyDismaxQParserTest {
     public void testForceCaching() throws Exception {
 
         when(request.getSchema()).thenReturn(schema);
-        when(schema.getQueryAnalyzer()).thenReturn(new StandardAnalyzer());
+        when(schema.getQueryAnalyzer()).thenReturn(new StandardAnalyzer(Version.LUCENE_CURRENT));
         when(rewriteChain.rewrite(any(), any())).thenReturn(new ExpandedQuery(new MatchAllQuery()));
 
         final ModifiableSolrParams solrParams = new ModifiableSolrParams();
@@ -112,7 +113,7 @@ public class QuerqyDismaxQParserTest {
     public void testThatInterdependentLuceneQueriesWillNotBeCachedSeparately() throws Exception {
 
         when(request.getSchema()).thenReturn(schema);
-        when(schema.getQueryAnalyzer()).thenReturn(new StandardAnalyzer());
+        when(schema.getQueryAnalyzer()).thenReturn(new StandardAnalyzer(Version.LUCENE_CURRENT));
         when(rewriteChain.rewrite(any(), any())).thenReturn(new ExpandedQuery(new MatchAllQuery()));
 
         final ModifiableSolrParams solrParams = new ModifiableSolrParams();
@@ -135,7 +136,7 @@ public class QuerqyDismaxQParserTest {
     public void testThatNonInterdependentLuceneQueriesCanBeCachedSeparately() throws Exception {
 
         when(request.getSchema()).thenReturn(schema);
-        when(schema.getQueryAnalyzer()).thenReturn(new StandardAnalyzer());
+        when(schema.getQueryAnalyzer()).thenReturn(new StandardAnalyzer(Version.LUCENE_CURRENT));
 
         final ModifiableSolrParams solrParams = new ModifiableSolrParams();
         solrParams.add("qf", "f1");

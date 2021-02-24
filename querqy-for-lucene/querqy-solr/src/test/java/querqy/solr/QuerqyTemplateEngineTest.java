@@ -9,7 +9,6 @@ import org.junit.Test;
 import static querqy.solr.QuerqyQParserPlugin.PARAM_REWRITERS;
 import static querqy.solr.StandaloneSolrTestSupport.withCommonRulesRewriter;
 
-@SolrTestCaseJ4.SuppressSSL
 public class QuerqyTemplateEngineTest extends SolrTestCaseJ4 {
 
     @BeforeClass

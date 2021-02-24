@@ -14,7 +14,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import querqy.solr.rewriter.commonrules.CommonRulesConfigRequestBuilder;
 
-@SolrTestCaseJ4.SuppressSSL
 public class QuerqyRewriterRequestHandlerStandaloneTest extends SolrTestCaseJ4 {
 
     public void index() {
@@ -78,7 +77,8 @@ public class QuerqyRewriterRequestHandlerStandaloneTest extends SolrTestCaseJ4 {
 
 
 
-        try (final SolrQueryRequest req = req("qt", "/querqy/rewriter/" + rewriterName )) {
+        try  {
+            final SolrQueryRequest req = req("qt", "/querqy/rewriter/" + rewriterName);
 
             assertQ("Rewriter config not found",
                     req,
@@ -91,6 +91,8 @@ public class QuerqyRewriterRequestHandlerStandaloneTest extends SolrTestCaseJ4 {
                     "//lst[@name='rewriter']/lst[@name='definition']/lst[@name='config']/str[@name='rules']" +
                             "[contains(.,'SYNONYM: b')]"
             );
+
+        } finally {
 
         }
 
@@ -111,7 +113,8 @@ public class QuerqyRewriterRequestHandlerStandaloneTest extends SolrTestCaseJ4 {
 
 
 
-        try (final SolrQueryRequest req = req("qt", "/querqy/rewriter")) {
+        try  {
+            final SolrQueryRequest req = req("qt", "/querqy/rewriter");
 
             assertQ("Rewriter config not found",
                     req,
@@ -125,6 +128,8 @@ public class QuerqyRewriterRequestHandlerStandaloneTest extends SolrTestCaseJ4 {
                             "/querqy/rewriter/" + rewriterName2 + "']"
 
             );
+
+        } finally {
 
         }
 

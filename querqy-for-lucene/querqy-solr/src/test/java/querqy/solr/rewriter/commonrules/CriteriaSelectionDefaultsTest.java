@@ -25,7 +25,6 @@ import java.util.Map;
  * as the default {@link SelectionStrategyFactory} instead of configuring it at the rewriter 'rules3'
  * TODO: can we merge the two tests into a single TestCase (as we can set the rewriters per request now)
  */
-@SolrTestCaseJ4.SuppressSSL
 public class CriteriaSelectionDefaultsTest extends SolrTestCaseJ4 {
 
     private static final String REWRITER_ID_1 = "rules1";

@@ -13,7 +13,6 @@ import querqy.solr.StandaloneSolrTestSupport;
 import java.util.HashMap;
 import java.util.Map;
 
-@SolrTestCaseJ4.SuppressSSL
 public class NumberUnitRewriterTest extends SolrTestCaseJ4 {
 
     @BeforeClass

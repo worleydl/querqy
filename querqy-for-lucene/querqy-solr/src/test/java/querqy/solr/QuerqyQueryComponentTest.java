@@ -21,7 +21,6 @@ import static querqy.solr.QuerqyQueryComponent.QUERQY_DECORATIONS;
 import static querqy.solr.QuerqyQueryComponent.QUERQY_NAMED_DECORATIONS;
 import static querqy.solr.ResponseSink.QUERQY_INFO_LOG;
 
-@SolrTestCaseJ4.SuppressSSL
 public class QuerqyQueryComponentTest extends SolrTestCaseJ4 {
 
     private QuerqyQueryComponent component;

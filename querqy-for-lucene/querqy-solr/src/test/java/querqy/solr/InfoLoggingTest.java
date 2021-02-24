@@ -9,7 +9,6 @@ import org.apache.solr.request.SolrQueryRequest;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-@SolrTestCaseJ4.SuppressSSL
 public class InfoLoggingTest extends SolrTestCaseJ4 {
 
     private final static String REWRITERS = "common1,common2";

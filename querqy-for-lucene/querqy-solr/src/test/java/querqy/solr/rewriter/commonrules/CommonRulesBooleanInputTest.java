@@ -10,7 +10,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import querqy.solr.StandaloneSolrTestSupport;
 
-@SolrTestCaseJ4.SuppressSSL
 public class CommonRulesBooleanInputTest extends SolrTestCaseJ4 {
 
     private static final String REWRITER_NAME = "common_rules";
@@ -138,19 +137,21 @@ public class CommonRulesBooleanInputTest extends SolrTestCaseJ4 {
 
     @Test
     public void testMixedBooleanNonBooleanInput() {
-        try (final SolrQueryRequest req = req( "q", "abc def",
-                DisMaxParams.QF, "f1 f2",
-                "fl", "id,score",
-                DisMaxParams.MM, "1",
-                PARAM_REWRITERS, REWRITER_NAME,
-                "debugQuery", "on",
-                "defType", "querqy"
+        try {
+            SolrQueryRequest req = req( "q", "abc def",
+                    DisMaxParams.QF, "f1 f2",
+                    "fl", "id,score",
+                    DisMaxParams.MM, "1",
+                    PARAM_REWRITERS, REWRITER_NAME,
+                    "debugQuery", "on",
+                    "defType", "querqy");
 
-        )) {
             assertQ("Mixed input not working", req,
                     "//result[@name='response' and @numFound='3']",
                     "//result/doc[1]/str[@name='id'][text()='8']"
                     );
+        } finally {
+
         }
     }
 

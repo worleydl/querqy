@@ -29,7 +29,6 @@ import querqy.rewrite.SearchEngineRequestAdapter;
 
 import java.util.*;
 
-@SolrTestCaseJ4.SuppressSSL
 public class QuerqyDismaxQParserPluginTest extends SolrTestCaseJ4 {
 
     public void index() {

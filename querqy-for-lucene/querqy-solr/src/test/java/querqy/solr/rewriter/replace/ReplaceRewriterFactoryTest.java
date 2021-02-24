@@ -27,7 +27,6 @@ import static querqy.solr.StandaloneSolrTestSupport.withCommonRulesRewriter;
 import static querqy.solr.StandaloneSolrTestSupport.withRewriter;
 import static querqy.solr.rewriter.replace.ReplaceRewriterFactory.*;
 
-@SolrTestCaseJ4.SuppressSSL
 public class ReplaceRewriterFactoryTest extends SolrTestCaseJ4 {
 
     private static final String FILE_NAME = "f1";

@@ -10,7 +10,6 @@ import querqy.parser.WhiteSpaceQuerqyParser;
 /**
  * Created by rene on 04/05/2017.
  */
-@SolrTestCaseJ4.SuppressSSL
 public class QuerqyDismaxQParserPluginConfigTest extends SolrTestCaseJ4 {
 
     @BeforeClass

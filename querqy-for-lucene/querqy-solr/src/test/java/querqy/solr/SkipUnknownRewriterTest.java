@@ -11,7 +11,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-@SolrTestCaseJ4.SuppressSSL
 public class SkipUnknownRewriterTest extends SolrTestCaseJ4 {
 
     public void index() {
@@ -39,12 +38,15 @@ public class SkipUnknownRewriterTest extends SolrTestCaseJ4 {
 
         String q = "a";
 
-        try(SolrQueryRequest req = req("q", q,
-                DisMaxParams.QF, "f1",
-                "defType", "querqy-default",
-                PARAM_REWRITERS, "unknown_rewriter"
-        )) {
+        try{
+            SolrQueryRequest req = req("q", q,
+                    DisMaxParams.QF, "f1",
+                    "defType", "querqy-default",
+                    PARAM_REWRITERS, "unknown_rewriter");
+
            assertQEx("Unknown rewriter should trigger bad request", req, SolrException.ErrorCode.BAD_REQUEST);
+        } finally {
+            // No-op
         }
 
     }
@@ -54,12 +56,15 @@ public class SkipUnknownRewriterTest extends SolrTestCaseJ4 {
 
         String q = "a";
 
-        try(SolrQueryRequest req = req("q", q,
-                DisMaxParams.QF, "f1",
-                "defType", "querqy-dont-skip",
-                PARAM_REWRITERS, "unknown_rewriter"
-        )) {
+        try {
+            SolrQueryRequest req = req("q", q,
+                    DisMaxParams.QF, "f1",
+                    "defType", "querqy-dont-skip",
+                    PARAM_REWRITERS, "unknown_rewriter");
+
             assertQEx("Unknown rewriter should trigger bad request", req, SolrException.ErrorCode.BAD_REQUEST);
+        } finally {
+
         }
 
     }
@@ -69,14 +74,16 @@ public class SkipUnknownRewriterTest extends SolrTestCaseJ4 {
 
         String q = "a";
 
-        try(SolrQueryRequest req = req("q", q,
-                DisMaxParams.QF, "f1",
-                "defType", "querqy-skip",
-                PARAM_REWRITERS, "unknown_rewriter"
-        )) {
-            assertQ("Unknown rewriter", req, "//result[@name='response' and @numFound='1']");
-        }
+        try {
+            SolrQueryRequest req = req("q", q,
+                    DisMaxParams.QF, "f1",
+                    "defType", "querqy-skip",
+                    PARAM_REWRITERS, "unknown_rewriter");
 
+            assertQ("Unknown rewriter", req, "//result[@name='response' and @numFound='1']");
+        } finally {
+
+        }
     }
 
 }
