@@ -82,6 +82,7 @@ public class DismaxSearchEngineRequestAdapterTest {
 
         ModifiableSolrParams params = new ModifiableSolrParams();
         params.set(name, Integer.toString(value));
+        params.set("q.op", "AND");
 
         when(request.getSchema()).thenReturn(null);
 
