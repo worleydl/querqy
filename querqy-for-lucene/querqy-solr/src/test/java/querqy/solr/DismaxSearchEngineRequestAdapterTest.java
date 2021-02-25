@@ -44,6 +44,7 @@ public class DismaxSearchEngineRequestAdapterTest {
 
         ModifiableSolrParams params = new ModifiableSolrParams();
         params.set(name, "0.5");
+        params.set("q.op", "AND");
 
         when(request.getSchema()).thenReturn(null);
 
@@ -63,6 +64,7 @@ public class DismaxSearchEngineRequestAdapterTest {
 
         ModifiableSolrParams params = new ModifiableSolrParams();
         params.set(name, "-0.03");
+        params.set("q.op", "AND");
 
         when(request.getSchema()).thenReturn(null);
 
@@ -103,6 +105,7 @@ public class DismaxSearchEngineRequestAdapterTest {
         ModifiableSolrParams params = new ModifiableSolrParams();
         params.set(name1, "true");
         params.set(name2, "false");
+        params.set("q.op", "AND");
 
         when(request.getSchema()).thenReturn(null);
 
@@ -123,6 +126,7 @@ public class DismaxSearchEngineRequestAdapterTest {
 
         ModifiableSolrParams params = new ModifiableSolrParams();
         params.set(name, value);
+        params.set("q.op", "AND");
 
         when(request.getSchema()).thenReturn(null);
 
@@ -144,6 +148,7 @@ public class DismaxSearchEngineRequestAdapterTest {
 
         ModifiableSolrParams params = new ModifiableSolrParams();
         params.add(name, value1, value2);
+        params.set("q.op", "AND");
 
         when(request.getSchema()).thenReturn(null);
 
@@ -163,6 +168,7 @@ public class DismaxSearchEngineRequestAdapterTest {
     @Test
     public void testThatFieldBoostingInQuerqyBoostQueriesIsOnByDefault() {
         ModifiableSolrParams params = new ModifiableSolrParams();
+        params.set("q.op", "AND");
         when(request.getSchema()).thenReturn(null);
         final DismaxSearchEngineRequestAdapter adapter = new DismaxSearchEngineRequestAdapter(qParser, request,
                 "some query", params, querqyParser, rewriteChain, infoLogging, null);
@@ -172,6 +178,7 @@ public class DismaxSearchEngineRequestAdapterTest {
     @Test
     public void testSettingFieldBoostingInQuerqyBoostQueriesToOn() {
         ModifiableSolrParams params = new ModifiableSolrParams();
+        params.set("q.op", "AND");
         params.add(QuerqyDismaxParams.QBOOST_FIELD_BOOST, QuerqyDismaxParams.QBOOST_FIELD_BOOST_ON);
 
         when(request.getSchema()).thenReturn(null);
@@ -184,6 +191,7 @@ public class DismaxSearchEngineRequestAdapterTest {
     public void testSettingFieldBoostingInQuerqyBoostQueriesToOff() {
         ModifiableSolrParams params = new ModifiableSolrParams();
         params.add(QuerqyDismaxParams.QBOOST_FIELD_BOOST, QuerqyDismaxParams.QBOOST_FIELD_BOOST_OFF);
+        params.set("q.op", "AND");
 
         when(request.getSchema()).thenReturn(null);
         final DismaxSearchEngineRequestAdapter adapter = new DismaxSearchEngineRequestAdapter(qParser, request,
@@ -195,6 +203,7 @@ public class DismaxSearchEngineRequestAdapterTest {
     public void testThatIllegalValueForFieldBoostingInQuerqyBoostThrowsException() {
         ModifiableSolrParams params = new ModifiableSolrParams();
         params.add(QuerqyDismaxParams.QBOOST_FIELD_BOOST, "maybe");
+        params.set("q.op", "AND");
 
         when(request.getSchema()).thenReturn(null);
         final DismaxSearchEngineRequestAdapter adapter = new DismaxSearchEngineRequestAdapter(qParser, request,
@@ -206,6 +215,7 @@ public class DismaxSearchEngineRequestAdapterTest {
     @Test(expected = RuntimeException.class)
     public void testThatExceptionIsThrownIfThereAreNeitherQueryFieldsNorDefaultField() {
         ModifiableSolrParams params = new ModifiableSolrParams();
+        params.set("q.op", "AND");
 
         when(request.getSchema()).thenReturn(null);
         final DismaxSearchEngineRequestAdapter adapter = new DismaxSearchEngineRequestAdapter(qParser, request,
@@ -218,6 +228,7 @@ public class DismaxSearchEngineRequestAdapterTest {
     public void testThatParseQueryFieldsReturnsEmptyMapIfThereAreNoQueryFieldsAndDefaultFieldNotEnabled() {
         ModifiableSolrParams params = new ModifiableSolrParams();
         params.add(CommonParams.DF, "f1"); // setting default field but not enabling it
+        params.set("q.op", "AND");
         final DismaxSearchEngineRequestAdapter adapter = new DismaxSearchEngineRequestAdapter(qParser, request,
                 "some query", params, querqyParser, rewriteChain, infoLogging, null);
         Assert.assertTrue(adapter.parseQueryFields(DisMaxParams.QF, 1f, false).isEmpty());
@@ -227,6 +238,7 @@ public class DismaxSearchEngineRequestAdapterTest {
     public void testThatParseQueryFieldsUsesDefaultFieldIfEnabled() {
         ModifiableSolrParams params = new ModifiableSolrParams();
         params.add(CommonParams.DF, "f1"); // setting default field but not enabling it
+        params.set("q.op", "AND");
         final DismaxSearchEngineRequestAdapter adapter = new DismaxSearchEngineRequestAdapter(qParser, request,
                 "some query", params, querqyParser, rewriteChain, infoLogging, null);
         final Map<String, Float> fields = adapter.parseQueryFields(DisMaxParams.QF, 2f, true);
