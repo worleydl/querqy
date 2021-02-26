@@ -48,7 +48,7 @@ public class QuerqyRewriterRequestHandler implements SolrRequestHandler, SolrCor
 
             // TODO OSC: I don't current see an easy way of accessing the HTTP method or path, may have to pass in additional params for this?
             // Solr V1 API can only handle GET and POST.
-            final String method = "POST"; //req.getHttpMethod();
+            final String method = null; //"POST"; //req.getHttpMethod();
 
             final String actionString = req.getParams().get(PARAM_ACTION);
             if (actionString == null && method == null) {
@@ -153,24 +153,56 @@ public class QuerqyRewriterRequestHandler implements SolrRequestHandler, SolrCor
 
     @Override
     public void handleRequest(final SolrQueryRequest req, final SolrQueryResponse rsp) {
+        final SolrParams params = req.getParams();
         final Map<String, RewriterFactory> rewriters = rewriterContainer.rewriters;
         final Map<String, Object> result = new HashMap<>();
-        final Map<String, Map<String, Object>> rewritersResult = rewriters.entrySet().stream().collect(
-                toMap(Map.Entry::getKey, entry -> {
 
-                    final Map<String, Object> rewriterMap = new LinkedHashMap<>(2);
-                    final String id = entry.getKey();
-                    rewriterMap.put("id", id);
-                    final String queryType = req.getParams().get(CommonParams.QT);
-                    // TODO OSC: Figure out access to the request path?
-                    final String prefix = queryType == null ? "noimpl" : queryType; //req.getPath() : queryType;
-                    rewriterMap.put("path", prefix.endsWith("/") ? prefix + id : prefix + "/" + id);
-                    return rewriterMap;
+        // OSC 4.6 Backport - No Subhandler support so that logic is handled here when rewriter_id param is set
+        if (params.get("rewriter_id") != null) {
+            final String rewriterId = params.get("rewriter_id");
+            final ActionParam action = fromRequest(req).orElse(GET);
 
-            }));
+            try {
+                switch (action) {
+                    case SAVE:
+                        doPut(req, rewriterId);
+                        break;
+                    case DELETE:
+                        rewriterContainer.deleteRewriter(rewriterId);
+                        break;
+                    case GET:
+                        final Map<String, Object> definition = rewriterContainer.readRewriterDefinition(rewriterId);
+                        final Map<String, Object> conf = new LinkedHashMap<>(3);
+                        conf.put("id", rewriterId);
+                        final String queryType = req.getParams().get(CommonParams.QT);
+                        // TODO OSC: Doublecheck, no access to path
+                        conf.put("path", queryType); // == null ? req.getPath() : queryType);
+                        conf.put("definition", definition);
+                        rsp.add("rewriter", conf);
+                        break;
+                }
+            } catch (final IOException ex) {
+                throw new RuntimeException(ex);
+            }
+
+        } else {
+            final Map<String, Map<String, Object>> rewritersResult = rewriters.entrySet().stream().collect(
+                    toMap(Map.Entry::getKey, entry -> {
+
+                        final Map<String, Object> rewriterMap = new LinkedHashMap<>(2);
+                        final String id = entry.getKey();
+                        rewriterMap.put("id", id);
+                        final String queryType = req.getParams().get(CommonParams.QT);
+                        // TODO OSC: Figure out access to the request path?
+                        final String prefix = queryType == null ? "noimpl" : queryType; //req.getPath() : queryType;
+                        rewriterMap.put("path", prefix.endsWith("/") ? prefix + id : prefix + "/" + id);
+                        return rewriterMap;
+
+                    }));
 
             result.put("rewriters", rewritersResult);
             rsp.add("response", result);
+        }
     }
 
     @Override
