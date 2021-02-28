@@ -7,6 +7,7 @@ import static querqy.solr.StandaloneSolrTestSupport.withCommonRulesRewriter;
 import org.apache.solr.SolrTestCaseJ4;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.DisMaxParams;
+import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.search.QueryParsing;
 import org.junit.Before;
@@ -78,12 +79,15 @@ public class QuerqyRewriterRequestHandlerStandaloneTest extends SolrTestCaseJ4 {
 
 
         try  {
-            final SolrQueryRequest req = req("qt", "/querqy/rewriter/" + rewriterName);
+            final SolrQueryRequest req = req("qt", "/querqy/rewriter/");
+            ModifiableSolrParams params = new ModifiableSolrParams(req.getParams());
+            params.set("rewriter_id", rewriterName);
+            req.setParams(params);
 
             assertQ("Rewriter config not found",
                     req,
                     "//lst[@name='rewriter']/str[@name='id'][text()='" + rewriterName + "']",
-                    "//lst[@name='rewriter']/str[@name='path'][text()='/querqy/rewriter/" + rewriterName + "']",
+                    "//lst[@name='rewriter']/str[@name='path'][text()='/querqy/rewriter/']",
                     "//lst[@name='rewriter']/lst[@name='definition']/str[@name='class']" +
                             "[text()='querqy.solr.rewriter.commonrules.CommonRulesRewriterFactory']",
                     "//lst[@name='rewriter']/lst[@name='definition']/lst[@name='config']/bool[@name='ignoreCase']" +
