@@ -86,32 +86,4 @@ public class BoostMethodTest extends SolrTestCaseJ4 {
 
     }
 
-    @Test
-    public void testThatReRankMethodCanBeActivated() {
-        String q = "qup";
-
-        SolrQueryRequest req = req("q", q,
-                DisMaxParams.QF, "f1 f2",
-                QueryParsing.OP, "OR",
-                QBOOST_METHOD, QBOOST_METHOD_RERANK,
-                "defType", "querqy",
-                "debugQuery", "true",
-                PARAM_REWRITERS, "common_rules"
-
-        );
-
-        assertQ("Method is not 'rerank'",
-                req,
-                "//result[@name='response'][@numFound='2']",
-                // the parsed query must contain not the boost terms:
-                "//str[@name='parsedquery'][not(contains(.,'f1:u100'))]",
-                "//str[@name='parsedquery'][not(contains(.,'f2:u100'))]",
-                // debug output must contain 'QuerqyReRankQuery'
-                "//lst[@name='explain']/str[contains(.,'QuerqyReRankQuery')]"
-        );
-        req.close();
-
-    }
-
-
 }
