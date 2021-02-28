@@ -301,7 +301,8 @@ public class DependentTermQueryBuilder implements TermQueryBuilder {
 
             @Override
             public Explanation explain(AtomicReaderContext context, int doc) {
-                return null;
+                return new Explanation(0.0f, "no matching term");
+
             }
 
             @Override
