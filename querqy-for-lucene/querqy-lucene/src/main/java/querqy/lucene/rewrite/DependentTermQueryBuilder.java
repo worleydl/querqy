@@ -273,23 +273,45 @@ public class DependentTermQueryBuilder implements TermQueryBuilder {
             }
 
             @Override
-            public Explanation explain(AtomicReaderContext atomicReaderContext, int i) throws IOException {
-                return new Explanation(1.0f, "Explain not supported in backport");
+            public Explanation explain(AtomicReaderContext context, int doc) throws IOException {
+                TermScorer scorer = scorer(context, false, false, null);
+
+                if (scorer != null) {
+                    int newDoc = scorer.advance(doc);
+                    if (newDoc == doc) {
+                        float freq = scorer.freq();
+
+                        float test = scorer.score();
+
+                        Similarity.SimScorer docScorer = similarity.simScorer(this.simWeight, context);
+                        Explanation freqExplanation = new Explanation(freq, "freq, occurences of term within document");
+                        Explanation scoreExplanation = docScorer.explain(doc, freqExplanation);
+
+                        Explanation result = new Explanation(scoreExplanation.getValue(),
+                                "weight(" + getQuery() + " in " + doc + ") ["
+                                + similarity.getClass().getSimpleName() + "], result of:");
+                        result.addDetail(scoreExplanation);
+
+                        return result;
+                    }
+                }
+
+                return new Explanation(0.0f, "no matching term");
             }
 
             @Override
             public Query getQuery() {
-                return null;
+                return DependentTermQuery.this;
             }
 
             @Override
             public float getValueForNormalization() throws IOException {
-                return 1.0f;
+                return simWeight.getValueForNormalization();
             }
 
             @Override
             public void normalize(float v, float v1) {
-
+                simWeight.normalize(v, v1);
             }
         }
 

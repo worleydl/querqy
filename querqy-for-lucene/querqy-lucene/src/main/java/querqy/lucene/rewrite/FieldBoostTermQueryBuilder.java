@@ -137,34 +137,26 @@ public class FieldBoostTermQueryBuilder implements TermQueryBuilder {
 
             @Override
             public Explanation explain(final AtomicReaderContext context, final int doc) throws IOException {
-
-                // TODO: Backport if time, not super important
-                /*
                 Scorer scorer = scorer(context, false, false, null);
                 if (scorer != null) {
                     int newDoc = scorer.advance(doc);
                     if (newDoc == doc) {
-                        Explanation scoreExplanation = Explanation.match(score, "product of:",
-                                Explanation.match(queryBoost, "queryBoost"),
-                                Explanation.match(fieldBoost, "fieldBoost")
-                        );
+                        Explanation queryBoost = new Explanation(getQueryBoost(), "queryBoost");
+                        Explanation fieldBoost = new Explanation(getFieldBoost(), "fieldBoost");
 
-                        Explanation result = Explanation.match(scorer.score(),
-                                "weight(" + getQuery() + " in " + doc + ") ["
-                                        + FieldBoostTermQuery.this.fieldBoost.getClass().getSimpleName() + "], result of:",
-                                scoreExplanation
+                        Explanation scoreExplanation = new Explanation(score, "product of:");
+                        scoreExplanation.addDetail(queryBoost);
+                        scoreExplanation.addDetail(fieldBoost);
 
-                        );
-
-
+                        Explanation result = new Explanation(scorer.score(), "weight(" + getQuery() + " in " + doc + ") ["
+                        + FieldBoostTermQuery.this.fieldBoost.getClass().getSimpleName() + "], result of:");
+                        result.addDetail(scoreExplanation);
 
                         return result;
                     }
                 }
-                return Explanation.noMatch("no matching term");
+                return new Explanation(0.0f, "no matching term");
 
-                 */
-                return new Explanation(1.0f, "Explanation not supported for this query");
             }
 
             @Override
@@ -185,6 +177,10 @@ public class FieldBoostTermQueryBuilder implements TermQueryBuilder {
 
             public float getFieldBoost() {
                 return fieldBoost;
+            }
+
+            public float getQueryBoost() {
+                return queryBoost;
             }
         }
 

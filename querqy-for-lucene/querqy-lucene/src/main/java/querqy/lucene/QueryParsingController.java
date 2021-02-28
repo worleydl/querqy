@@ -1,12 +1,14 @@
 package querqy.lucene;
 
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.queries.function.BoostedQuery;
 import org.apache.lucene.queries.function.FunctionQuery;
 import org.apache.lucene.queries.function.valuesource.ProductFloatFunction;
 import org.apache.lucene.queries.function.valuesource.QueryValueSource;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.ConstantScoreQuery;
+import org.apache.lucene.search.FilteredQuery;
 import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.queries.function.ValueSource;
@@ -220,8 +222,12 @@ public class QueryParsingController {
 
             final BooleanQuery builder = new BooleanQuery();
             // TODO: No filter clause, always using must
-            builder.add(LuceneQueryUtil.boost(mainQuery, requestAdapter.getUserQueryWeight().orElse(1f)),
-                    BooleanClause.Occur.MUST);
+            if (mainQuery instanceof MatchAllDocsQuery) {
+                builder.add(mainQuery, BooleanClause.Occur.MUST);
+            } else {
+                builder.add(LuceneQueryUtil.boost(mainQuery, requestAdapter.getUserQueryWeight().orElse(1f)),
+                        BooleanClause.Occur.MUST);
+            }
 
             if (additiveBoosts != null) {
                 for (final Query f : additiveBoosts) {
@@ -237,20 +243,14 @@ public class QueryParsingController {
 
             final BooleanQuery bq = builder;
 
-            // TODO: Revisit first thing, commented out mainQuery assignment so I can run tests.
             if (hasMultiplicativeBoosts) {
-
-                if (multiplicativeBoosts.size() > 1) {
-                    final ValueSource prod = new ProductFloatFunction(
-                            multiplicativeBoosts
-                                .stream()
-                                .map(LuceneQueryUtil::queryToValueSource)
-                                .toArray(ValueSource[]::new)
-                    );
-                    mainQuery = bq; //FunctionScoreQuery.boostByValue(bq, prod.asDoubleValuesSource());
-                } else {
-                    mainQuery = bq; //FunctionScoreQuery.boostByValue(bq, LuceneQueryUtil.queryToDoubleValueSource(multiplicativeBoosts.get(0)));
-                }
+                final ValueSource prod = new ProductFloatFunction(
+                        multiplicativeBoosts
+                            .stream()
+                            .map(LuceneQueryUtil::queryToValueSource)
+                            .toArray(ValueSource[]::new)
+                );
+                mainQuery = new BoostedQuery(bq, prod); //FunctionScoreQuery.boostByValue(bq, prod.asDoubleValuesSource());
             } else {
                 mainQuery = bq;
             }
