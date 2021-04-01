@@ -70,10 +70,10 @@ public class QuerqyExtendQParserPluginTest extends SolrTestCaseJ4 {
 
     @Test
     public void testBasicFunctionality() {
-        SolrQueryRequest req = req("q", "f1:a f2:a", "debug", "true", "defType", "querqyex");
+        SolrQueryRequest req = req("q", "f1:a f2:b", "debug", "true", "defType", "querqyex");
 
-        assertQ("local params don't work",
-             req,"//str[@name='parsedquery' and text()='DisjunctionMaxQuery((f1:a | f2:a))']");
+        assertQ("Basic expansion isn't working!",
+             req,"//str[@name='parsedquery' and text()='DisjunctionMaxQuery((f1:a | f2:a)) DisjunctionMaxQuery((f1:b | f2:b))']");
 
         req.close();
     }

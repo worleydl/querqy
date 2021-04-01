@@ -72,30 +72,30 @@ public class QuerqyExpandQParser extends QParser {
         try {
             Query query = dismaxQParser.parse();
 
-
             Set<Term> terms = new HashSet<>();
             query.extractTerms(terms);
 
-            String termText = "";
+            Set<String> queryTerms = new HashSet<>();
             Set<String> fields = new HashSet<>();
             for (Term term : terms) {
                 fields.add(term.field());
-                termText = term.text(); // Replaced each time, last one wins but they should all be the same
+                queryTerms.add(term.text());
             }
 
             ModifiableSolrParams mutableParams = new ModifiableSolrParams(params);
+
+            String termText = StringUtils.join(queryTerms, " ");
             mutableParams.set("q", termText);
             mutableParams.set("qf", StringUtils.join(fields, " "));
 
-            // TODO: Any other parameters to sync? Is it okay to rewrite qf
+            // TODO: Any other parameters to sync? Is it okay to rewrite qf?
             // Setup request adapter with altered parameters
             requestAdapter = new DismaxSearchEngineRequestAdapter(this, req, termText,
                     SolrParams.wrapDefaults(localParams, mutableParams), querqyParser, rewriteChain, infoLogging, termQueryCache);
 
 
+            // From here we parse like a regular querqy query
             controller = createQueryParsingController();
-
-
 
         } catch (SyntaxError ex) {
             throw new RuntimeException("Syntax error parsing query.");
