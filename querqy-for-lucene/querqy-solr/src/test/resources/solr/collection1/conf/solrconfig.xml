@@ -59,6 +59,15 @@
 		</lst>
      	 
 	</queryParser>
+
+	<queryParser name="querqyex" class="querqy.solr.QuerqyExpandQParserPlugin">
+
+		<lst name="parser">
+			<str name="factory">querqy.solr.SimpleQuerqyQParserFactory</str>
+			<str name="class">querqy.parser.WhiteSpaceQuerqyParser</str>
+		</lst>
+
+	</queryParser>
 	
 	<admin>
 		<defaultQuery>solr</defaultQuery>
