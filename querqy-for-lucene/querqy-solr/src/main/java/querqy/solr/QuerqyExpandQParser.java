@@ -2,6 +2,8 @@ package querqy.solr;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.index.Term;
+import org.apache.lucene.search.BooleanClause;
+import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.CommonParams;
@@ -19,6 +21,7 @@ import querqy.lucene.LuceneQueries;
 import querqy.lucene.LuceneSearchEngineRequestAdapter;
 import querqy.lucene.QueryParsingController;
 import querqy.lucene.rewrite.cache.TermQueryCache;
+import querqy.model.BoostQuery;
 import querqy.parser.QuerqyParser;
 import querqy.rewrite.RewriteChain;
 import querqy.rewrite.SearchEngineRequestAdapter;
@@ -72,15 +75,19 @@ public class QuerqyExpandQParser extends QParser {
         try {
             Query query = dismaxQParser.parse();
 
+            assert query instanceof BooleanQuery;
+            BooleanQuery bq = (BooleanQuery) query;
+
             Set<Term> terms = new HashSet<>();
             query.extractTerms(terms);
 
             Set<String> queryTerms = new HashSet<>();
             Set<String> fields = new HashSet<>();
-            for (Term term : terms) {
-                fields.add(term.field());
-                queryTerms.add(term.text());
-            }
+
+            Set<Term> clauseTerms = new HashSet<>();
+
+            descendAndExtract(bq, queryTerms, fields);
+
 
             ModifiableSolrParams mutableParams = new ModifiableSolrParams(params);
 
@@ -105,6 +112,24 @@ public class QuerqyExpandQParser extends QParser {
 
     public QueryParsingController createQueryParsingController() {
         return new QueryParsingController(requestAdapter);
+    }
+
+    private void descendAndExtract(BooleanQuery bq, Set<String> queryTerms, Set<String> fieldsAndBoosts) {
+        for (BooleanClause clause : bq.getClauses()) {
+            if (clause.getQuery() instanceof BooleanQuery) {
+                descendAndExtract((BooleanQuery) clause.getQuery(), queryTerms, fieldsAndBoosts);
+            } else {
+                Query clauseQuery = clause.getQuery();
+
+                Set<Term> clauseTerms = new HashSet<>();
+                clauseQuery.extractTerms(clauseTerms);
+
+                for (Term term : clauseTerms) {
+                    fieldsAndBoosts.add(term.field() + "^" + clauseQuery.getBoost());
+                    queryTerms.add(term.text());
+                }
+            }
+        }
     }
 
     @Override

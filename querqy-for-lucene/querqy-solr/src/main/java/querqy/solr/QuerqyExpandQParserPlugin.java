@@ -13,7 +13,8 @@ import querqy.rewrite.RewriteChain;
  *
  * Presumptions:
  * - All query clauses have fields specified
- * - The query term is the same for all clauses
+ * - The query term is the same for all clauses (altho things may work if not)
+ * - Query fields are not repeated
  */
 public class QuerqyExpandQParserPlugin extends QuerqyQParserPlugin {
 
