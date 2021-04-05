@@ -20,11 +20,13 @@ import querqy.infologging.InfoLogging;
 import querqy.lucene.LuceneQueries;
 import querqy.lucene.LuceneSearchEngineRequestAdapter;
 import querqy.lucene.QueryParsingController;
+import querqy.lucene.rewrite.BooleanQueryFactory;
 import querqy.lucene.rewrite.cache.TermQueryCache;
 import querqy.model.BoostQuery;
 import querqy.parser.QuerqyParser;
 import querqy.rewrite.RewriteChain;
 import querqy.rewrite.SearchEngineRequestAdapter;
+import querqy.solr.backport.DismaxUtil;
 
 import java.util.HashSet;
 import java.util.List;
@@ -69,67 +71,33 @@ public class QuerqyExpandQParser extends QParser {
 
         this.querqyParser = querqyParser;
 
-        // Parse the query with edismax then prepare what we need for querqy.
-        ExtendedDismaxQParser dismaxQParser = new ExtendedDismaxQParser(qstr, localParams, params, req);
+        Set<String> queryTerms = new HashSet<>();
+        Set<String> fields = new HashSet<>();
+        List<DismaxUtil.Clause> clauses = DismaxUtil.splitIntoClauses(qstr, true);
 
-        try {
-            Query query = dismaxQParser.parse();
-
-            assert query instanceof BooleanQuery;
-            BooleanQuery bq = (BooleanQuery) query;
-
-            Set<Term> terms = new HashSet<>();
-            query.extractTerms(terms);
-
-            Set<String> queryTerms = new HashSet<>();
-            Set<String> fields = new HashSet<>();
-
-            Set<Term> clauseTerms = new HashSet<>();
-
-            descendAndExtract(bq, queryTerms, fields);
-
-
-            ModifiableSolrParams mutableParams = new ModifiableSolrParams(params);
-
-            String termText = StringUtils.join(queryTerms, " ");
-            mutableParams.set("q", termText);
-            mutableParams.set("qf", StringUtils.join(fields, " "));
-
-            // TODO: Any other parameters to sync? Is it okay to rewrite qf?
-            // Setup request adapter with altered parameters
-            requestAdapter = new DismaxSearchEngineRequestAdapter(this, req, termText,
-                    SolrParams.wrapDefaults(localParams, mutableParams), querqyParser, rewriteChain, infoLogging, termQueryCache);
-
-
-            // From here we parse like a regular querqy query
-            controller = createQueryParsingController();
-
-        } catch (SyntaxError ex) {
-            throw new RuntimeException("Syntax error parsing query.");
+        for ( DismaxUtil.Clause clause : clauses) {
+            fields.add(clause.field + "^" + clause.boost);
+            queryTerms.add(clause.val);
         }
 
+        ModifiableSolrParams mutableParams = new ModifiableSolrParams(params);
+
+        String termText = StringUtils.join(queryTerms, " ");
+        mutableParams.set("q", termText);
+        mutableParams.set("qf", StringUtils.join(fields, " "));
+
+        // TODO: Any other parameters to sync? Is it okay to rewrite qf?
+        // Setup request adapter with altered parameters
+        requestAdapter = new DismaxSearchEngineRequestAdapter(this, req, termText,
+                SolrParams.wrapDefaults(localParams, mutableParams), querqyParser, rewriteChain, infoLogging, termQueryCache);
+
+
+        // From here we parse like a regular querqy query
+        controller = createQueryParsingController();
     }
 
     public QueryParsingController createQueryParsingController() {
         return new QueryParsingController(requestAdapter);
-    }
-
-    private void descendAndExtract(BooleanQuery bq, Set<String> queryTerms, Set<String> fieldsAndBoosts) {
-        for (BooleanClause clause : bq.getClauses()) {
-            if (clause.getQuery() instanceof BooleanQuery) {
-                descendAndExtract((BooleanQuery) clause.getQuery(), queryTerms, fieldsAndBoosts);
-            } else {
-                Query clauseQuery = clause.getQuery();
-
-                Set<Term> clauseTerms = new HashSet<>();
-                clauseQuery.extractTerms(clauseTerms);
-
-                for (Term term : clauseTerms) {
-                    fieldsAndBoosts.add(term.field() + "^" + clauseQuery.getBoost());
-                    queryTerms.add(term.text());
-                }
-            }
-        }
     }
 
     @Override

@@ -32,28 +32,28 @@ import static querqy.solr.QuerqyQParserPlugin.PARAM_REWRITERS;
 import static querqy.solr.StandaloneSolrTestSupport.withCommonRulesRewriter;
 import static querqy.solr.StandaloneSolrTestSupport.withRewriter;
 
-public class QuerqyExtendQParserPluginTest extends SolrTestCaseJ4 {
+public class QuerqyExpandQParserPluginTest extends SolrTestCaseJ4 {
 
     public void index() {
 
-        assertU(adoc("id", "1", "f1", "a"));
-        assertU(adoc("id", "2", "f1", "a"));
-        assertU(adoc("id", "3", "f2", "a"));
-        assertU(adoc("id", "4", "f1", "b"));
-        assertU(adoc("id", "5", "f1", "spellcheck", "f2", "test"));
-        assertU(adoc("id", "6", "f1", "spellcheck filtered", "f2", "test"));
-        assertU(adoc("id", "7", "f1", "aaa"));
-        assertU(adoc("id", "8", "f1", "aaa bbb ccc", "f2", "w87"));
-        assertU(adoc("id", "9", "f1", "ignore o u s"));
-        assertU(adoc("id", "10", "f1", "vv uu tt ss xx ff gg hh"));
-        assertU(adoc("id", "11", "f1", "xx yy zz tt ll ff gg hh"));
+        assertU(adoc("id", "1", "f1_stopwords", "a"));
+        assertU(adoc("id", "2", "f1_stopwords", "a"));
+        assertU(adoc("id", "3", "f2_stopwords", "a"));
+        assertU(adoc("id", "4", "f1_stopwords", "b"));
+        assertU(adoc("id", "5", "f1_stopwords", "spellcheck", "f2_stopwords", "test"));
+        assertU(adoc("id", "6", "f1_stopwords", "spellcheck filtered", "f2_stopwords", "test"));
+        assertU(adoc("id", "7", "f1_stopwords", "aaa"));
+        assertU(adoc("id", "8", "f1_stopwords", "aaa bbb ccc", "f2_stopwords", "w87"));
+        assertU(adoc("id", "9", "f1_stopwords", "ignore o u s"));
+        assertU(adoc("id", "10", "f1_stopwords", "vv uu tt ss xx ff gg hh"));
+        assertU(adoc("id", "11", "f1_stopwords", "xx yy zz tt ll ff gg hh"));
 
         assertU(commit());
     }
 
     @BeforeClass
     public static void beforeTests() throws Exception {
-        initCore("solrconfig.xml", "schema.xml");
+        initCore("solrconfig.xml", "schema-stopwords.xml");
         withCommonRulesRewriter(h.getCore(), "common_rules",
                 "configs/commonrules/rules-QuerqyDismaxQParserTest.txt");
         withRewriter(h.getCore(), "match_all_filter", MatchAllRewriter.class);
@@ -70,10 +70,10 @@ public class QuerqyExtendQParserPluginTest extends SolrTestCaseJ4 {
 
     @Test
     public void testBasicFunctionality() {
-        SolrQueryRequest req = req("q", "f1:a^5 f2:b^10", "debug", "true", "defType", "querqyex");
+        SolrQueryRequest req = req("q", "f1_stopwords:a^5 f2_stopwords:stopB^10", "debug", "true", "defType", "querqyex");
 
         assertQ("Basic expansion isn't working!",
-             req,"//str[@name='parsedquery' and text()='DisjunctionMaxQuery((f1:a^5.0 | f2:a^10.0)) DisjunctionMaxQuery((f1:b^5.0 | f2:b^10.0))']");
+             req,"//str[@name='parsedquery' and text()='DisjunctionMaxQuery((f2_stopwords:a^10.0 | f1_stopwords:a^5.0))']");
 
         req.close();
     }
