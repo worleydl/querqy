@@ -123,15 +123,7 @@ public class DismaxUtil {
                         case '&':
                         case '/':
                             clause.hasSpecialSyntax = true;
-                            sb.append('\\');
                     }
-                } else if (ch=='"') {
-                    // only char we need to escape in a string is double quote
-                    sb.append('\\');
-                }
-
-                if (forceBreak) {
-                    break;
                 }
 
                 sb.append(ch);
@@ -141,7 +133,7 @@ public class DismaxUtil {
             // Strip the boost from val and assign to local var
             if (clause.val.lastIndexOf('^') > 0) {
                 clause.boost = new Float(clause.val.substring(clause.val.lastIndexOf('^') + 1));
-                clause.val = clause.val.substring(0, clause.val.lastIndexOf('^') - 1);
+                clause.val = clause.val.substring(0, clause.val.lastIndexOf('^'));
             }
 
             if (clause.isPhrase) {

@@ -70,10 +70,40 @@ public class QuerqyExpandQParserPluginTest extends SolrTestCaseJ4 {
 
     @Test
     public void testBasicFunctionality() {
-        SolrQueryRequest req = req("q", "f1_stopwords:a^5 f2_stopwords:stopB^10", "debug", "true", "defType", "querqyex");
+        SolrQueryRequest req = req("q", "f1_stopwords:a^5 f2_stopwords:a^10", "debug", "true", "defType", "querqyex", "isFreeTextSearch", "true", "spellcheck.q", "a");
 
         assertQ("Basic expansion isn't working!",
              req,"//str[@name='parsedquery' and text()='DisjunctionMaxQuery((f2_stopwords:a^10.0 | f1_stopwords:a^5.0))']");
+
+        req.close();
+    }
+
+    @Test
+    public void testMultiTerm() {
+        SolrQueryRequest req = req("q", "f1_stopwords:(blah)^5 f2_stopwords:(blah)^10", "debug", "true", "defType", "querqyex", "isFreeTextSearch", "true", "spellcheck.q", "a b");
+
+        assertQ("Multiterm query parses",
+                req,"//str[@name='parsedquery' and text()='DisjunctionMaxQuery((f2_stopwords:a^10.0 | f1_stopwords:a^5.0)) DisjunctionMaxQuery((f2_stopwords:b^10.0 | f1_stopwords:b^5.0))']");
+
+        req.close();
+    }
+
+    @Test
+    public void testPassthru() {
+        SolrQueryRequest req = req("q", "f1_stopwords:(blah)^5 f2_stopwords:(blah)^10", "debug", "true", "defType", "querqyex", "isFreeTextSearch", "false", "spellcheck.q", "a b");
+
+        assertQ("Multiterm query parses",
+                req,"//str[@name='parsedquery' and text()='(+(f1_stopwords:blah^5.0 f2_stopwords:blah^10.0))/no_coord']");
+
+        req.close();
+    }
+
+    @Test
+    public void testMissingSpellcheck() {
+        SolrQueryRequest req = req("q", "f1_stopwords:(blah)^5 f2_stopwords:(blah)^10", "debug", "true", "defType", "querqyex", "isFreeTextSearch", "true");
+
+        assertQEx("Missing spellcheck with isFreeTextSearch set to true should cause exception",
+                req,400);
 
         req.close();
     }

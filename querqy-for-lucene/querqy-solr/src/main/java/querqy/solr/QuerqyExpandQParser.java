@@ -1,9 +1,6 @@
 package querqy.solr;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.lucene.index.Term;
-import org.apache.lucene.search.BooleanClause;
-import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.CommonParams;
@@ -20,9 +17,7 @@ import querqy.infologging.InfoLogging;
 import querqy.lucene.LuceneQueries;
 import querqy.lucene.LuceneSearchEngineRequestAdapter;
 import querqy.lucene.QueryParsingController;
-import querqy.lucene.rewrite.BooleanQueryFactory;
 import querqy.lucene.rewrite.cache.TermQueryCache;
-import querqy.model.BoostQuery;
 import querqy.parser.QuerqyParser;
 import querqy.rewrite.RewriteChain;
 import querqy.rewrite.SearchEngineRequestAdapter;
@@ -37,6 +32,7 @@ import java.util.Set;
 import static org.apache.solr.common.SolrException.ErrorCode.BAD_REQUEST;
 
 public class QuerqyExpandQParser extends QParser {
+    private final ExtendedDismaxQParser extendedDismaxQParser;
     private final QuerqyParser querqyParser;
 
     protected final QueryParsingController controller;
@@ -44,6 +40,14 @@ public class QuerqyExpandQParser extends QParser {
 
     protected LuceneQueries luceneQueries = null;
     protected Query processedQuery = null;
+
+
+    private enum PARSE_MODE {
+        QUERQY,
+        PASSTHRU
+    }
+
+    private PARSE_MODE parseMode;
 
     /**
      * Constructor for the QParser
@@ -71,29 +75,51 @@ public class QuerqyExpandQParser extends QParser {
 
         this.querqyParser = querqyParser;
 
-        Set<String> queryTerms = new HashSet<>();
-        Set<String> fields = new HashSet<>();
-        List<DismaxUtil.Clause> clauses = DismaxUtil.splitIntoClauses(qstr, true);
-
-        for ( DismaxUtil.Clause clause : clauses) {
-            fields.add(clause.field + "^" + clause.boost);
-            queryTerms.add(clause.val);
-        }
-
         ModifiableSolrParams mutableParams = new ModifiableSolrParams(params);
+        String termText = "";
 
-        String termText = StringUtils.join(queryTerms, " ");
-        mutableParams.set("q", termText);
-        mutableParams.set("qf", StringUtils.join(fields, " "));
+        if (params.getBool("isFreeTextSearch", false)) {
+            this.parseMode = PARSE_MODE.QUERQY;
+            extendedDismaxQParser = null;
 
-        // TODO: Any other parameters to sync? Is it okay to rewrite qf?
-        // Setup request adapter with altered parameters
-        requestAdapter = new DismaxSearchEngineRequestAdapter(this, req, termText,
-                SolrParams.wrapDefaults(localParams, mutableParams), querqyParser, rewriteChain, infoLogging, termQueryCache);
+            Set<String> fields = new HashSet<>();
+            List<DismaxUtil.Clause> clauses = DismaxUtil.splitIntoClauses(qstr, false);
 
+            for (DismaxUtil.Clause clause : clauses) {
+                if (clause.field != null) {
+                    fields.add(clause.field + "^" + clause.boost);
+                }
 
-        // From here we parse like a regular querqy query
-        controller = createQueryParsingController();
+                /**
+                 * TODO:
+                 * Should you revisit this code you can do some reconstruction of the query using clause.val
+                 *
+                 * For now since the q had many variations of stemmed/nonstemmed already coming in we're just using
+                 * the spellcheck.q
+                 */
+            }
+
+            // Grab query from spellcheck.q (safer for term text parsing)
+            if (params.get("spellcheck.q", "").isEmpty()) {
+                throw new SolrException(BAD_REQUEST, "`spellcheck.q` must be set if isFreeTextSearch is true.");
+            }
+
+            termText = params.get("spellcheck.q", "*:*");
+            mutableParams.set("q", termText);
+            mutableParams.set("qf", StringUtils.join(fields, " "));
+
+            requestAdapter = new DismaxSearchEngineRequestAdapter(this, req, termText,
+                    SolrParams.wrapDefaults(localParams, mutableParams), this.querqyParser, rewriteChain, infoLogging, termQueryCache);
+
+            // From here we parse like a regular querqy query
+            controller = createQueryParsingController();
+
+        } else {
+            parseMode = PARSE_MODE.PASSTHRU;
+            extendedDismaxQParser = new ExtendedDismaxQParser(qstr, localParams, params, req);
+            controller = null;
+            requestAdapter = null;
+        }
     }
 
     public QueryParsingController createQueryParsingController() {
@@ -102,27 +128,33 @@ public class QuerqyExpandQParser extends QParser {
 
     @Override
     public Query parse() throws SyntaxError {
+        if (parseMode == PARSE_MODE.PASSTHRU) {
+            return extendedDismaxQParser.parse();
+        } else {
+            try {
+                luceneQueries = controller.process();
+                processedQuery = maybeWrapQuery(luceneQueries.mainQuery);
 
-        try {
-            luceneQueries = controller.process();
-            processedQuery = maybeWrapQuery(luceneQueries.mainQuery);
+            } catch (final LuceneSearchEngineRequestAdapter.SyntaxException e) {
+                throw new SyntaxError("Syntax error", e);
+            }
 
-        } catch (final LuceneSearchEngineRequestAdapter.SyntaxException e) {
-            throw new SyntaxError("Syntax error", e);
+            return processedQuery;
         }
-
-        return processedQuery;
-
     }
 
     @Override
     public Query getQuery() throws SyntaxError {
-        if (query==null) {
-            query=parse();
-            applyLocalParams();
+        if (parseMode == PARSE_MODE.PASSTHRU) {
+            return extendedDismaxQParser.getQuery();
+        } else {
+            if (query == null) {
+                query = parse();
+                applyLocalParams();
 
+            }
+            return query;
         }
-        return query;
     }
 
     protected void applyLocalParams() {
@@ -175,21 +207,27 @@ public class QuerqyExpandQParser extends QParser {
 
     @Override
     public Query getHighlightQuery() throws SyntaxError {
-        if (processedQuery == null) {
-            parse();
+        if (parseMode == PARSE_MODE.PASSTHRU) {
+            return extendedDismaxQParser.getHighlightQuery();
+        } else {
+            if (processedQuery == null) {
+                parse();
+            }
+            return luceneQueries.userQuery;
         }
-        return luceneQueries.userQuery;
     }
 
     @Override
     public void addDebugInfo(final NamedList<Object> debugInfo) {
-
         super.addDebugInfo(debugInfo);
-        final Map<String, Object> info = controller.getDebugInfo();
-        for (final Map.Entry<String, Object> entry : info.entrySet()) {
-            debugInfo.add(entry.getKey(), entry.getValue());
+        if (parseMode == PARSE_MODE.PASSTHRU) {
+            extendedDismaxQParser.addDebugInfo(debugInfo);
+        } else {
+            final Map<String, Object> info = controller.getDebugInfo();
+            for (final Map.Entry<String, Object> entry : info.entrySet()) {
+                debugInfo.add(entry.getKey(), entry.getValue());
+            }
         }
-
     }
 
       public SearchEngineRequestAdapter getSearchEngineRequestAdapter() {
