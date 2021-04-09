@@ -1,6 +1,10 @@
 package querqy.solr;
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.apache.commons.lang.StringUtils;
+import org.apache.lucene.index.Term;
+import org.apache.lucene.search.BooleanClause;
+import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.CommonParams;
@@ -21,7 +25,6 @@ import querqy.lucene.rewrite.cache.TermQueryCache;
 import querqy.parser.QuerqyParser;
 import querqy.rewrite.RewriteChain;
 import querqy.rewrite.SearchEngineRequestAdapter;
-import querqy.solr.backport.DismaxUtil;
 
 import java.util.HashSet;
 import java.util.List;
@@ -86,20 +89,16 @@ public class QuerqyExpandQParser extends QParser {
             extendedDismaxQParser = null;
 
             Set<String> fields = new HashSet<>();
-            List<DismaxUtil.Clause> clauses = DismaxUtil.splitIntoClauses(qstr, false);
+            ExtendedDismaxQParser parser = new ExtendedDismaxQParser(qstr, localParams, params, req);
+            try {
+                Query parsedQuery = parser.parse();
 
-            for (DismaxUtil.Clause clause : clauses) {
-                if (clause.field != null) {
-                    fields.add(clause.field + "^" + clause.boost);
-                }
+                assert parsedQuery instanceof BooleanQuery;
+                BooleanQuery bq = (BooleanQuery) parsedQuery;
 
-                /**
-                 * TODO:
-                 * Should you revisit this code you can do some reconstruction of the query using clause.val
-                 *
-                 * For now since the q had many variations of stemmed/nonstemmed already coming in we're just using
-                 * the spellcheck.q
-                 */
+                descendAndExtract(bq, fields);
+            } catch (SyntaxError ex) {
+                throw new SolrException(BAD_REQUEST, "Unable to expand query");
             }
 
             // Grab query from spellcheck.q (safer for term text parsing)
@@ -246,5 +245,22 @@ public class QuerqyExpandQParser extends QParser {
 
     public List<Query> getFilterQueries() {
         return luceneQueries == null ? null : luceneQueries.filterQueries;
+    }
+
+    private void descendAndExtract(BooleanQuery bq, Set<String> fields) {
+        for (BooleanClause clause : bq.getClauses()) {
+            if (clause.getQuery() instanceof BooleanQuery) {
+                descendAndExtract((BooleanQuery) clause.getQuery(), fields);
+            } else {
+                Query clauseQuery = clause.getQuery();
+                Set<Term> clauseTerms = new HashSet<>();
+
+                clauseQuery.extractTerms(clauseTerms);
+
+                for (Term term : clauseTerms) {
+                    fields.add(term.field() + "^" + clauseQuery.getBoost());
+                }
+            }
+        }
     }
 }
