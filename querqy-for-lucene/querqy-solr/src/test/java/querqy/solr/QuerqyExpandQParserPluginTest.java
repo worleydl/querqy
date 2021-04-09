@@ -92,7 +92,6 @@ public class QuerqyExpandQParserPluginTest extends SolrTestCaseJ4 {
     public void testFiltered() {
         SolrQueryRequest req = req(
                 "q", "f1_stopwords:(zz)",
-                "qf", "f1_stopwords",
                 "debug", "true",
                 PARAM_REWRITERS, "common_rules",
                 "defType", "querqyex",
@@ -104,6 +103,22 @@ public class QuerqyExpandQParserPluginTest extends SolrTestCaseJ4 {
                 "//result[@name='response' and @numFound='1']",
                 "//arr[@name='parsed_filter_queries']/str[text() = 'f2_stopwords:filtered']"
         );
+
+        req.close();
+    }
+
+    @Test
+    public void testQuoteFormat() {
+        SolrQueryRequest req = req(
+                "q", "(f1_stopwords:\"zz\"^5.0) (f2_stopwords:\"zz\")^10.0",
+                "debug", "true",
+                PARAM_REWRITERS, "common_rules",
+                "defType", "querqyex",
+                "isFreeTextSearch", "true",
+                "spellcheck.q", "zz");
+
+        assertQ("Parses boosts with quotes",
+                req,"//str[@name='querqyex_qf' and text()='f1_stopwords^5.0 f2_stopwords^10.0']");
 
         req.close();
     }
