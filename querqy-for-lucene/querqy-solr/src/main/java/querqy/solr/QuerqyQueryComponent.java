@@ -43,19 +43,23 @@ public class QuerqyQueryComponent extends QueryComponent {
 
         QParser parser = rb.getQparser();
 
-        if (parser instanceof QuerqyDismaxQParser) {
+        List<Query> filterQueries = null;
 
-            List<Query> filterQueries = ((QuerqyDismaxQParser) parser).getFilterQueries();
-            if ((filterQueries != null) && !filterQueries.isEmpty()) {
-                List<Query> filters = rb.getFilters();
-                if (filters == null) {
-                    rb.setFilters(filterQueries);
-                } else {
-                    filters.addAll(filterQueries);
-                }
-            }
+        if (parser instanceof QuerqyDismaxQParser) {
+            filterQueries = ((QuerqyDismaxQParser) parser).getFilterQueries();
 
             // No rank query support in Solr 4.6.1
+        } else if (parser instanceof QuerqyExpandQParser) {
+            filterQueries = ((QuerqyExpandQParser) parser).getFilterQueries();
+        }
+
+        if ((filterQueries != null) && !filterQueries.isEmpty()) {
+            List<Query> filters = rb.getFilters();
+            if (filters == null) {
+                rb.setFilters(filterQueries);
+            } else {
+                filters.addAll(filterQueries);
+            }
         }
     }
 
@@ -69,11 +73,15 @@ public class QuerqyQueryComponent extends QueryComponent {
 
         final QParser parser = rb.getQparser();
 
+        SearchEngineRequestAdapter searchEngineRequestAdapter = null;
         if (parser instanceof QuerqyDismaxQParser) {
-
-            final SearchEngineRequestAdapter searchEngineRequestAdapter =
+            searchEngineRequestAdapter =
                     ((QuerqyDismaxQParser) parser).getSearchEngineRequestAdapter();
+        } else if (parser instanceof QuerqyExpandQParser) {
+            searchEngineRequestAdapter = ((QuerqyExpandQParser) parser).getSearchEngineRequestAdapter();
+        }
 
+        if (searchEngineRequestAdapter != null) {
             final Map<String, Object> context = searchEngineRequestAdapter.getContext();
             if (context != null) {
 

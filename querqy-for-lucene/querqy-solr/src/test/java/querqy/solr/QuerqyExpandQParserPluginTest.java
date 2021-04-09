@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static querqy.solr.QuerqyQParserPlugin.PARAM_REWRITERS;
 import static querqy.solr.StandaloneSolrTestSupport.withCommonRulesRewriter;
 import static querqy.solr.StandaloneSolrTestSupport.withRewriter;
 
@@ -36,6 +37,8 @@ public class QuerqyExpandQParserPluginTest extends SolrTestCaseJ4 {
         assertU(adoc("id", "9", "f1_stopwords", "ignore o u s"));
         assertU(adoc("id", "10", "f1_stopwords", "vv uu tt ss xx ff gg hh"));
         assertU(adoc("id", "11", "f1_stopwords", "xx yy zz tt ll ff gg hh"));
+        assertU(adoc("id", "12", "f1_stopwords", "zz", "f2_stopwords", "filtered"));
+        assertU(adoc("id", "13", "f1_stopwords", "zz", "f2_stopwords", "unfiltered"));
 
         assertU(commit());
     }
@@ -44,7 +47,7 @@ public class QuerqyExpandQParserPluginTest extends SolrTestCaseJ4 {
     public static void beforeTests() throws Exception {
         initCore("solrconfig.xml", "schema-stopwords.xml");
         withCommonRulesRewriter(h.getCore(), "common_rules",
-                "configs/commonrules/rules-QuerqyDismaxQParserTest.txt");
+                "configs/commonrules/rules-QuerqyExpandQParserTest.txt");
         withRewriter(h.getCore(), "match_all_filter", MatchAllRewriter.class);
 
     }
@@ -73,12 +76,34 @@ public class QuerqyExpandQParserPluginTest extends SolrTestCaseJ4 {
         req.close();
     }
 
+
+
     @Test
     public void testMultiTerm() {
         SolrQueryRequest req = req("q", "f1_stopwords:(blah)^5 f2_stopwords:(blah)^10", "debug", "true", "defType", "querqyex", "isFreeTextSearch", "true", "spellcheck.q", "a b");
 
         assertQ("Multiterm query parses",
                 req,"//str[@name='parsedquery' and text()='DisjunctionMaxQuery((f2_stopwords:a^10.0 | f1_stopwords:a^5.0)) DisjunctionMaxQuery((f2_stopwords:b^10.0 | f1_stopwords:b^5.0))']");
+
+        req.close();
+    }
+
+    @Test
+    public void testFiltered() {
+        SolrQueryRequest req = req(
+                "q", "f1_stopwords:(zz)",
+                "qf", "f1_stopwords",
+                "debug", "true",
+                PARAM_REWRITERS, "common_rules",
+                "defType", "querqyex",
+                "isFreeTextSearch", "true",
+                "spellcheck.q", "zz");
+
+        assertQ("Filter expected",
+                req,
+                "//result[@name='response' and @numFound='1']",
+                "//arr[@name='parsed_filter_queries']/str[text() = 'f2_stopwords:filtered']"
+        );
 
         req.close();
     }
