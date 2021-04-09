@@ -38,6 +38,9 @@ public class QuerqyExpandQParser extends QParser {
     protected final QueryParsingController controller;
     protected final DismaxSearchEngineRequestAdapter requestAdapter;
 
+    protected String parsedQueryString;
+    protected String parsedQf;
+
     protected LuceneQueries luceneQueries = null;
     protected Query processedQuery = null;
 
@@ -107,6 +110,8 @@ public class QuerqyExpandQParser extends QParser {
             termText = params.get("spellcheck.q", "*:*");
             mutableParams.set("q", termText);
             mutableParams.set("qf", StringUtils.join(fields, " "));
+            parsedQueryString = termText;
+            parsedQf = StringUtils.join(fields, " ");
 
             requestAdapter = new DismaxSearchEngineRequestAdapter(this, req, termText,
                     SolrParams.wrapDefaults(localParams, mutableParams), this.querqyParser, rewriteChain, infoLogging, termQueryCache);
@@ -221,16 +226,21 @@ public class QuerqyExpandQParser extends QParser {
     public void addDebugInfo(final NamedList<Object> debugInfo) {
         super.addDebugInfo(debugInfo);
         if (parseMode == PARSE_MODE.PASSTHRU) {
+            debugInfo.add("querqy_parse_mode", "edismax passthru");
             extendedDismaxQParser.addDebugInfo(debugInfo);
         } else {
             final Map<String, Object> info = controller.getDebugInfo();
             for (final Map.Entry<String, Object> entry : info.entrySet()) {
                 debugInfo.add(entry.getKey(), entry.getValue());
             }
+
+            debugInfo.add("querqy_parse_mode", "querqy rules");
+            debugInfo.add("querqyex_q", parsedQueryString);
+            debugInfo.add("querqyex_qf", parsedQf);
         }
     }
 
-      public SearchEngineRequestAdapter getSearchEngineRequestAdapter() {
+    public SearchEngineRequestAdapter getSearchEngineRequestAdapter() {
         return requestAdapter;
     }
 

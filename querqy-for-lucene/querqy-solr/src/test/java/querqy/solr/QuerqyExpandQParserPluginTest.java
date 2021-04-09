@@ -1,23 +1,15 @@
 package querqy.solr;
 
-import org.apache.lucene.search.BooleanQuery;
-import org.apache.lucene.search.Query;
 import org.apache.solr.SolrTestCaseJ4;
-import org.apache.solr.common.params.DisMaxParams;
-import org.apache.solr.common.params.HighlightParams;
 import org.apache.solr.request.SolrQueryRequest;
-import org.apache.solr.search.QueryParsing;
-import org.apache.solr.search.WrappedQuery;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import querqy.infologging.InfoLogging;
 import querqy.model.ExpandedQuery;
 import querqy.model.MatchAllQuery;
 import querqy.model.Term;
 import querqy.parser.WhiteSpaceQuerqyParser;
 import querqy.rewrite.QueryRewriter;
-import querqy.rewrite.RewriteChain;
 import querqy.rewrite.RewriterFactory;
 import querqy.rewrite.SearchEngineRequestAdapter;
 
@@ -26,9 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static querqy.solr.QuerqyDismaxParams.GFB;
-import static querqy.solr.QuerqyDismaxParams.GQF;
-import static querqy.solr.QuerqyQParserPlugin.PARAM_REWRITERS;
 import static querqy.solr.StandaloneSolrTestSupport.withCommonRulesRewriter;
 import static querqy.solr.StandaloneSolrTestSupport.withRewriter;
 
@@ -72,8 +61,14 @@ public class QuerqyExpandQParserPluginTest extends SolrTestCaseJ4 {
     public void testBasicFunctionality() {
         SolrQueryRequest req = req("q", "f1_stopwords:a^5 f2_stopwords:a^10", "debug", "true", "defType", "querqyex", "isFreeTextSearch", "true", "spellcheck.q", "a");
 
-        assertQ("Basic expansion isn't working!",
+        assertQ("Basic expansion is working",
              req,"//str[@name='parsedquery' and text()='DisjunctionMaxQuery((f2_stopwords:a^10.0 | f1_stopwords:a^5.0))']");
+
+        assertQ("Verify parsed q",
+                req,"//str[@name='querqyex_q' and text()='a']");
+
+        assertQ("Verify parsed qf",
+                req,"//str[@name='querqyex_qf' and text()='f1_stopwords^5.0 f2_stopwords^10.0']");
 
         req.close();
     }
@@ -95,6 +90,8 @@ public class QuerqyExpandQParserPluginTest extends SolrTestCaseJ4 {
         assertQ("Multiterm query parses",
                 req,"//str[@name='parsedquery' and text()='(+(f1_stopwords:blah^5.0 f2_stopwords:blah^10.0))/no_coord']");
 
+        assertQ("Verify debug",
+                req,"//str[@name='querqy_parse_mode' and text()='edismax passthru']");
         req.close();
     }
 
@@ -107,6 +104,7 @@ public class QuerqyExpandQParserPluginTest extends SolrTestCaseJ4 {
 
         req.close();
     }
+
 
     public static class MatchAllRewriter extends SolrRewriterFactoryAdapter {
 
