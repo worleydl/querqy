@@ -110,7 +110,7 @@ public class QuerqyExpandQParserPluginTest extends SolrTestCaseJ4 {
     @Test
     public void testWithBoostParam() {
         SolrQueryRequest req = req(
-                "q", "f1_stopwords:(zz)",
+                "q", "f1_stopwords:(zz)^5.0 f2_stopwords:(zz)^10.0",
                 "debug", "true",
                 "boost", "sum(1,1)",
                 "defType", "querqyex",
@@ -119,7 +119,9 @@ public class QuerqyExpandQParserPluginTest extends SolrTestCaseJ4 {
 
         assertQ("It works with a boost clause",
                 req,
-                "//result[@name='response' and @numFound='3']"
+                "//result[@name='response' and @numFound='3']",
+                "//str[@name='querqyex_qf' and text()='f1_stopwords^5.0 f2_stopwords^10.0']",
+                "//str[@name='querqyex_q' and text()='zz']"
         );
 
         req.close();
