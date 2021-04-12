@@ -3,6 +3,7 @@ package querqy.solr;
 import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.index.Term;
+import org.apache.lucene.queries.function.BoostedQuery;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
@@ -92,6 +93,11 @@ public class QuerqyExpandQParser extends QParser {
             ExtendedDismaxQParser parser = new ExtendedDismaxQParser(qstr, localParams, params, req);
             try {
                 Query parsedQuery = parser.parse();
+
+                // Handle the boosted query case (edismax always returns BooleanQuery or BoostedQuery in Solr4)
+                if (parsedQuery instanceof BoostedQuery) {
+                    parsedQuery = ((BoostedQuery) parsedQuery).getQuery();
+                }
 
                 assert parsedQuery instanceof BooleanQuery;
                 BooleanQuery bq = (BooleanQuery) parsedQuery;
