@@ -32,13 +32,14 @@ public class QuerqyExpandQParserPluginTest extends SolrTestCaseJ4 {
         assertU(adoc("id", "4", "f1_stopwords", "b"));
         assertU(adoc("id", "5", "f1_stopwords", "spellcheck", "f2_stopwords", "test"));
         assertU(adoc("id", "6", "f1_stopwords", "spellcheck filtered", "f2_stopwords", "test"));
-        assertU(adoc("id", "7", "f1_stopwords", "aaa"));
-        assertU(adoc("id", "8", "f1_stopwords", "aaa bbb ccc", "f2_stopwords", "w87"));
-        assertU(adoc("id", "9", "f1_stopwords", "ignore o u s"));
-        assertU(adoc("id", "10", "f1_stopwords", "vv uu tt ss xx ff gg hh"));
-        assertU(adoc("id", "11", "f1_stopwords", "xx yy zz tt ll ff gg hh"));
-        assertU(adoc("id", "12", "f1_stopwords", "zz", "f2_stopwords", "filtered"));
-        assertU(adoc("id", "13", "f1_stopwords", "zz", "f2_stopwords", "unfiltered"));
+        assertU(adoc("id", "7", "f1_stopwords", "spellcheck filtered"));
+        assertU(adoc("id", "8", "f1_stopwords", "aaa"));
+        assertU(adoc("id", "9", "f1_stopwords", "aaa bbb ccc", "f2_stopwords", "w87"));
+        assertU(adoc("id", "10", "f1_stopwords", "ignore o u s"));
+        assertU(adoc("id", "11", "f1_stopwords", "vv uu tt ss xx ff gg hh"));
+        assertU(adoc("id", "12", "f1_stopwords", "xx yy zz tt ll ff gg hh"));
+        assertU(adoc("id", "13", "f1_stopwords", "zz", "f2_stopwords", "filtered"));
+        assertU(adoc("id", "14", "f1_stopwords", "zz", "f2_stopwords", "unfiltered"));
 
         assertU(commit());
     }
@@ -102,6 +103,26 @@ public class QuerqyExpandQParserPluginTest extends SolrTestCaseJ4 {
                 req,
                 "//result[@name='response' and @numFound='1']",
                 "//arr[@name='parsed_filter_queries']/str[text() = 'f2_stopwords:filtered']"
+        );
+
+        req.close();
+    }
+
+    @Test
+    public void testFilterPassthru() {
+        SolrQueryRequest req = req(
+                "q", "f1_stopwords:(spellcheck)",
+                "fq", "f2_stopwords:(test)",
+                "debug", "true",
+                PARAM_REWRITERS, "common_rules",
+                "defType", "querqyex",
+                "isFreeTextSearch", "true",
+                "spellcheck.q", "spellcheck");
+
+        assertQ("FQ passes thru",
+                req,
+                "//result[@name='response' and @numFound='2']",
+                "//arr[@name='parsed_filter_queries']/str[text() = 'f2_stopwords:test']"
         );
 
         req.close();
