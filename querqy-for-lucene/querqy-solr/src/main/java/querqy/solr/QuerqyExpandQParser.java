@@ -18,6 +18,8 @@ import org.apache.solr.search.ExtendedQuery;
 import org.apache.solr.search.QParser;
 import org.apache.solr.search.SyntaxError;
 import org.apache.solr.search.WrappedQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import querqy.infologging.InfoLogging;
 import querqy.lucene.LuceneQueries;
 import querqy.lucene.LuceneSearchEngineRequestAdapter;
@@ -33,6 +35,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import static java.lang.Enum.valueOf;
 import static org.apache.solr.common.SolrException.ErrorCode.BAD_REQUEST;
 
 public class QuerqyExpandQParser extends QParser {
@@ -47,6 +50,8 @@ public class QuerqyExpandQParser extends QParser {
 
     protected LuceneQueries luceneQueries = null;
     protected Query processedQuery = null;
+
+    public final static Logger log = LoggerFactory.getLogger(QuerqyExpandQParser.class);
 
 
     private enum PARSE_MODE {
@@ -123,7 +128,7 @@ public class QuerqyExpandQParser extends QParser {
 
             // From here we parse like a regular querqy query
             controller = createQueryParsingController();
-
+            log.info("qex: " + SolrParams.wrapDefaults(localParams, mutableParams).toString());
         } else {
             parseMode = PARSE_MODE.PASSTHRU;
             extendedDismaxQParser = new ExtendedDismaxQParser(qstr, localParams, params, req);
