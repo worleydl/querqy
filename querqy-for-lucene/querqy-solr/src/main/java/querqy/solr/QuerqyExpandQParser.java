@@ -6,6 +6,7 @@ import org.apache.lucene.index.Term;
 import org.apache.lucene.queries.function.BoostedQuery;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.PrefixQuery;
 import org.apache.lucene.search.Query;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.CommonParams;
@@ -266,7 +267,12 @@ public class QuerqyExpandQParser extends QParser {
                 Query clauseQuery = clause.getQuery();
                 Set<Term> clauseTerms = new HashSet<>();
 
-                clauseQuery.extractTerms(clauseTerms);
+                if (!(clauseQuery instanceof PrefixQuery)) {
+                    clauseQuery.extractTerms(clauseTerms);
+                } else {
+                    PrefixQuery pQuery = (PrefixQuery) clauseQuery;
+                    fields.add(pQuery.getField() + "^" + pQuery.getBoost());
+                }
 
                 for (Term term : clauseTerms) {
                     fields.add(term.field() + "^" + clauseQuery.getBoost());

@@ -26,10 +26,10 @@ public class QuerqyExpandQParserPluginTest extends SolrTestCaseJ4 {
 
     public void index() {
 
-        assertU(adoc("id", "1", "f1_stopwords", "a"));
-        assertU(adoc("id", "2", "f1_stopwords", "a"));
-        assertU(adoc("id", "3", "f2_stopwords", "a"));
-        assertU(adoc("id", "4", "f1_stopwords", "b"));
+        assertU(adoc("id", "1", "f1_stopwords", "a", "f2_stopwords", "a"));
+        assertU(adoc("id", "2", "f1_stopwords", "a", "f2_stopwords", "a"));
+        assertU(adoc("id", "3", "f1_stopwords", "a", "f2_stopwords", "a"));
+        assertU(adoc("id", "4", "f1_stopwords", "b", "f2_stopwords", "a"));
         assertU(adoc("id", "5", "f1_stopwords", "spellcheck", "f2_stopwords", "test"));
         assertU(adoc("id", "6", "f1_stopwords", "spellcheck filtered test pf", "f2_stopwords", "test"));
         assertU(adoc("id", "7", "f1_stopwords", "spellcheck filtered"));
@@ -123,6 +123,45 @@ public class QuerqyExpandQParserPluginTest extends SolrTestCaseJ4 {
                 req,
                 "//result[@name='response' and @numFound='2']",
                 "//arr[@name='parsed_filter_queries']/str[text() = 'f2_stopwords:test']"
+        );
+
+        req.close();
+    }
+
+    @Test
+    public void testNegateFilterPassthru() {
+        SolrQueryRequest req = req(
+                "q", "f1_stopwords:(*)",
+                "fq", "-(f2_stopwords:(test))",
+                "debug", "true",
+                PARAM_REWRITERS, "common_rules",
+                "defType", "querqyex",
+                "isFreeTextSearch", "true",
+                "spellcheck.q", "*");
+
+        assertQ("FQ passes thru with negation",
+                req,
+                "//result[@name='response' and @numFound='12']"
+        );
+
+        req.close();
+    }
+
+    @Test
+    public void testFilterStackPassthru() {
+        SolrQueryRequest req = req(
+                "q", "f1_stopwords:(*)",
+                "fq", "f1_stopwords:(a)",
+                "fq", "f2_stopwords:(a)",
+                "debug", "true",
+                PARAM_REWRITERS, "common_rules",
+                "defType", "querqyex",
+                "isFreeTextSearch", "true",
+                "spellcheck.q", "*");
+
+        assertQ("Multiple fq works",
+                req,
+                "//result[@name='response' and @numFound='3']"
         );
 
         req.close();
