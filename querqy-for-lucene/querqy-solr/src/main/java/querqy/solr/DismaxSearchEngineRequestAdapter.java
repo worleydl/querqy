@@ -397,8 +397,8 @@ public class DismaxSearchEngineRequestAdapter implements LuceneSearchEngineReque
                         final Float b = bfAndBoost.getValue();
                         if (null != b && b != 1f) {
                             fq.setBoost((b));
-                            boosts.add(fq);
                         }
+
                         boosts.add(fq);
 
                     } catch (final SyntaxError syntaxError) {
