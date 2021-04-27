@@ -148,7 +148,25 @@ public class QuerqyExpandQParserPluginTest extends SolrTestCaseJ4 {
         req.close();
     }
 
+    @Test
+    public void testBoostNegateFilterPassthru() {
+        SolrQueryRequest req = req(
+                "q", "f1_stopwords:(*)",
+                "fq", "-(f2_stopwords:(test))",
+                "boost", "sum(5,5)",
+                "debug", "true",
+                PARAM_REWRITERS, "common_rules",
+                "defType", "querqyex",
+                "isFreeTextSearch", "true",
+                "spellcheck.q", "*");
 
+        assertQ("FQ passes thru with negation",
+                req,
+                "//result[@name='response' and @numFound='13']"
+        );
+
+        req.close();
+    }
 
     @Test
     public void testFilterStackPassthru() {
