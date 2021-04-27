@@ -40,6 +40,7 @@ public class QuerqyExpandQParserPluginTest extends SolrTestCaseJ4 {
         assertU(adoc("id", "12", "f1_stopwords", "xx yy zz tt ll ff gg hh"));
         assertU(adoc("id", "13", "f1_stopwords", "zz", "f2_stopwords", "filtered"));
         assertU(adoc("id", "14", "f1_stopwords", "zz", "f2_stopwords", "unfiltered"));
+        assertU(adoc("id", "15", "string", "123"));
 
         assertU(commit());
     }
@@ -141,11 +142,13 @@ public class QuerqyExpandQParserPluginTest extends SolrTestCaseJ4 {
 
         assertQ("FQ passes thru with negation",
                 req,
-                "//result[@name='response' and @numFound='12']"
+                "//result[@name='response' and @numFound='13']"
         );
 
         req.close();
     }
+
+
 
     @Test
     public void testFilterStackPassthru() {
@@ -160,6 +163,25 @@ public class QuerqyExpandQParserPluginTest extends SolrTestCaseJ4 {
                 "spellcheck.q", "*");
 
         assertQ("Multiple fq works",
+                req,
+                "//result[@name='response' and @numFound='3']"
+        );
+
+        req.close();
+    }
+
+    @Test
+    public void testNumericStringFilterPassthru() {
+        SolrQueryRequest req = req(
+                "q", "f1_stopwords:(a)",
+                "fq", "-(string:123)",
+                "debug", "true",
+                PARAM_REWRITERS, "common_rules",
+                "defType", "querqyex",
+                "isFreeTextSearch", "true",
+                "spellcheck.q", "a");
+
+        assertQ("Negated numeric string works",
                 req,
                 "//result[@name='response' and @numFound='3']"
         );

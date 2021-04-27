@@ -24,6 +24,7 @@
       <field name="f1_stopwords"  type="text_stopwords"   indexed="true"  stored="true"  multiValued="false" />
       <field name="f2_stopwords"        type="text_stopwords"   indexed="true"  stored="true"  multiValued="false" />
       <field name="f3"        type="text"   indexed="true"  stored="true"  multiValued="false" />
+      <field name="string" indexed="true" type="string" multiValued="false" stored="true" docValues="true"/>
   </fields>
 
  <uniqueKey>id</uniqueKey>
