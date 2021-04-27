@@ -32,7 +32,7 @@ public class QuerqyExpandQParserPluginTest extends SolrTestCaseJ4 {
         assertU(adoc("id", "4", "f1_stopwords", "b", "f2_stopwords", "a"));
         assertU(adoc("id", "5", "f1_stopwords", "spellcheck", "f2_stopwords", "test"));
         assertU(adoc("id", "6", "f1_stopwords", "spellcheck filtered test pf", "f2_stopwords", "test"));
-        assertU(adoc("id", "7", "f1_stopwords", "spellcheck filtered"));
+        assertU(adoc("id", "7", "f1_stopwords", "spellcheck filtered pf"));
         assertU(adoc("id", "8", "f1_stopwords", "aaa"));
         assertU(adoc("id", "9", "f1_stopwords", "aaa bbb ccc", "f2_stopwords", "w87"));
         assertU(adoc("id", "10", "f1_stopwords", "ignore o u s"));
@@ -112,17 +112,36 @@ public class QuerqyExpandQParserPluginTest extends SolrTestCaseJ4 {
     @Test
     public void testFilterPassthru() {
         SolrQueryRequest req = req(
-                "q", "f1_stopwords:(spellcheck)",
+                "q", "f1_stopwords:(pf)",
                 "fq", "f2_stopwords:(test)",
                 "debug", "true",
                 PARAM_REWRITERS, "common_rules",
                 "defType", "querqyex",
                 "isFreeTextSearch", "true",
-                "spellcheck.q", "spellcheck");
+                "spellcheck.q", "pf");
 
         assertQ("FQ passes thru",
                 req,
-                "//result[@name='response' and @numFound='2']",
+                "//result[@name='response' and @numFound='1']",
+                "//arr[@name='parsed_filter_queries']/str[text() = 'f2_stopwords:test']"
+        );
+
+        req.close();
+    }
+
+    @Test
+    public void testDirectFilterPassthru() {
+        SolrQueryRequest req = req(
+                "q", "pf",
+                "fq", "f2_stopwords:(test)",
+                "qf", "f1_stopwords",
+                "debug", "true",
+                "defType", "querqy",
+                "spellcheck.q", "pf");
+
+        assertQ("FQ passes thru",
+                req,
+                "//result[@name='response' and @numFound='1']",
                 "//arr[@name='parsed_filter_queries']/str[text() = 'f2_stopwords:test']"
         );
 
