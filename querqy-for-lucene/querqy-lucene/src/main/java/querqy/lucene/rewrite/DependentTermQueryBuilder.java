@@ -229,8 +229,7 @@ public class DependentTermQueryBuilder implements TermQueryBuilder {
                     }
 
                     Similarity.SimScorer scorer = similarity.simScorer(this.simWeight, context);
-                    // TODO: Revisit logic here, check diff
-                    return new TermScorer(this, termsEnum.docs(null, null), scorer);
+                    return new TermScorer(this, termsEnum.docs(bits, null), scorer);
                 } catch (IOException ex) {
                     return null;
                 }

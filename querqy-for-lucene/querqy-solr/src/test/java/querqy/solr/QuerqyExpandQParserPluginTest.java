@@ -40,7 +40,8 @@ public class QuerqyExpandQParserPluginTest extends SolrTestCaseJ4 {
         assertU(adoc("id", "12", "f1_stopwords", "xx yy zz tt ll ff gg hh"));
         assertU(adoc("id", "13", "f1_stopwords", "zz", "f2_stopwords", "filtered"));
         assertU(adoc("id", "14", "f1_stopwords", "zz", "f2_stopwords", "unfiltered"));
-        assertU(adoc("id", "15", "string", "123"));
+        assertU(adoc("id", "15", "f1_stopwords", "abc", "string", "123"));
+        assertU(adoc("id", "16", "f1_stopwords", "abc", "string", "456"));
 
         assertU(commit());
     }
@@ -112,18 +113,18 @@ public class QuerqyExpandQParserPluginTest extends SolrTestCaseJ4 {
     @Test
     public void testFilterPassthru() {
         SolrQueryRequest req = req(
-                "q", "f1_stopwords:(pf)",
-                "fq", "f2_stopwords:(test)",
+                "q", "f1_stopwords:abc",
+                "fq", "string:123",
                 "debug", "true",
                 PARAM_REWRITERS, "common_rules",
                 "defType", "querqyex",
                 "isFreeTextSearch", "true",
-                "spellcheck.q", "pf");
+                "spellcheck.q", "abc");
 
         assertQ("FQ passes thru",
                 req,
                 "//result[@name='response' and @numFound='1']",
-                "//arr[@name='parsed_filter_queries']/str[text() = 'f2_stopwords:test']"
+                "//arr[@name='parsed_filter_queries']/str[text() = 'string:123']"
         );
 
         req.close();
@@ -181,7 +182,7 @@ public class QuerqyExpandQParserPluginTest extends SolrTestCaseJ4 {
 
         assertQ("FQ passes thru with negation",
                 req,
-                "//result[@name='response' and @numFound='13']"
+                "//result[@name='response' and @numFound='14']"
         );
 
         req.close();
