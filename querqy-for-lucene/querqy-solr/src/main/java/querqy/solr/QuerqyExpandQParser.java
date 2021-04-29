@@ -30,6 +30,7 @@ import querqy.parser.QuerqyParser;
 import querqy.rewrite.RewriteChain;
 import querqy.rewrite.SearchEngineRequestAdapter;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +38,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import static java.lang.Enum.valueOf;
+import static java.util.stream.Collectors.joining;
 import static org.apache.solr.common.SolrException.ErrorCode.BAD_REQUEST;
 
 public class QuerqyExpandQParser extends QParser {
@@ -95,7 +97,7 @@ public class QuerqyExpandQParser extends QParser {
             this.parseMode = PARSE_MODE.QUERQY;
             extendedDismaxQParser = null;
 
-            Set<String> fields = new HashSet<>();
+            Map<String, Float> fields = new HighestBoostMap();
             ExtendedDismaxQParser parser = new ExtendedDismaxQParser(qstr, localParams, params, req);
             try {
                 Query parsedQuery = parser.parse();
@@ -120,9 +122,15 @@ public class QuerqyExpandQParser extends QParser {
 
             termText = params.get("spellcheck.q", "*:*");
             mutableParams.set("q", termText);
-            mutableParams.set("qf", StringUtils.join(fields, " "));
+
+            String qf = fields.entrySet()
+                    .stream()
+                    .map( e -> e.getKey() + "^" + e.getValue())
+                    .collect(joining(" "));
+
+            mutableParams.set("qf", qf);
             parsedQueryString = termText;
-            parsedQf = StringUtils.join(fields, " ");
+            parsedQf = qf;
 
             requestAdapter = new DismaxSearchEngineRequestAdapter(this, req, termText,
                     SolrParams.wrapDefaults(localParams, mutableParams), this.querqyParser, rewriteChain, infoLogging, termQueryCache);
@@ -259,10 +267,10 @@ public class QuerqyExpandQParser extends QParser {
         return luceneQueries == null ? null : luceneQueries.filterQueries;
     }
 
-    private void descendAndExtract(BooleanQuery bq, Set<String> fields) {
+    private void descendAndExtract(BooleanQuery bq, Map<String, Float> fieldsAndBoosts) {
         for (BooleanClause clause : bq.getClauses()) {
             if (clause.getQuery() instanceof BooleanQuery) {
-                descendAndExtract((BooleanQuery) clause.getQuery(), fields);
+                descendAndExtract((BooleanQuery) clause.getQuery(), fieldsAndBoosts);
             } else {
                 Query clauseQuery = clause.getQuery();
                 Set<Term> clauseTerms = new HashSet<>();
@@ -271,12 +279,27 @@ public class QuerqyExpandQParser extends QParser {
                     clauseQuery.extractTerms(clauseTerms);
                 } else {
                     PrefixQuery pQuery = (PrefixQuery) clauseQuery;
-                    fields.add(pQuery.getField() + "^" + pQuery.getBoost());
+                    fieldsAndBoosts.put(pQuery.getField(), pQuery.getBoost());
                 }
 
                 for (Term term : clauseTerms) {
-                    fields.add(term.field() + "^" + clauseQuery.getBoost());
+                    fieldsAndBoosts.put(term.field(), clauseQuery.getBoost());
                 }
+            }
+        }
+    }
+
+    private static class HighestBoostMap extends HashMap<String, Float> {
+        @Override
+        public Float put(String key, Float value){
+            if (this.containsKey(key)) {
+                if (value > this.get(key)) {
+                    return super.put(key, value);
+                } else {
+                    return this.get(key);
+                }
+            } else {
+                return super.put(key, value);
             }
         }
     }

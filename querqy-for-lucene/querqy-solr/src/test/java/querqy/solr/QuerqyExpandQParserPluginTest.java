@@ -74,7 +74,7 @@ public class QuerqyExpandQParserPluginTest extends SolrTestCaseJ4 {
                 req,"//str[@name='querqyex_q' and text()='a']");
 
         assertQ("Verify parsed qf",
-                req,"//str[@name='querqyex_qf' and text()='f1_stopwords^5.0 f2_stopwords^10.0']");
+                req,"//str[@name='querqyex_qf' and text()='f2_stopwords^10.0 f1_stopwords^5.0']");
 
         req.close();
     }
@@ -90,6 +90,25 @@ public class QuerqyExpandQParserPluginTest extends SolrTestCaseJ4 {
 
         req.close();
     }
+
+    @Test
+    public void testPicksHighest() {
+        SolrQueryRequest req = req(
+                "q", "f1_stopwords:(zz)^2.0 f1_stopwords:(zz)^4.0",
+                "debug", "true",
+                PARAM_REWRITERS, "common_rules",
+                "defType", "querqyex",
+                "isFreeTextSearch", "true",
+                "spellcheck.q", "zz");
+
+        assertQ("Filter expected",
+                req,
+                "//str[@name='querqyex_qf' and text()='f1_stopwords^4.0']"
+        );
+
+        req.close();
+    }
+
 
     @Test
     public void testFiltered() {
@@ -276,7 +295,7 @@ public class QuerqyExpandQParserPluginTest extends SolrTestCaseJ4 {
         assertQ("It works with a boost clause",
                 req,
                 "//result[@name='response' and @numFound='3']",
-                "//str[@name='querqyex_qf' and text()='f1_stopwords^5.0 f2_stopwords^10.0']",
+                "//str[@name='querqyex_qf' and text()='f2_stopwords^10.0 f1_stopwords^5.0']",
                 "//str[@name='querqyex_q' and text()='zz']"
         );
 
@@ -294,7 +313,7 @@ public class QuerqyExpandQParserPluginTest extends SolrTestCaseJ4 {
                 "spellcheck.q", "zz");
 
         assertQ("Parses boosts with quotes",
-                req,"//str[@name='querqyex_qf' and text()='f1_stopwords^5.0 f2_stopwords^10.0']");
+                req,"//str[@name='querqyex_qf' and text()='f2_stopwords^10.0 f1_stopwords^5.0']");
 
         req.close();
     }
