@@ -42,6 +42,7 @@ public class QuerqyExpandQParserPluginTest extends SolrTestCaseJ4 {
         assertU(adoc("id", "14", "f1_stopwords", "zz", "f2_stopwords", "unfiltered"));
         assertU(adoc("id", "15", "f1_stopwords", "abc", "string", "123"));
         assertU(adoc("id", "16", "f1_stopwords", "abc", "string", "456"));
+        assertU(adoc("id", "17", "f1_stopwords", "xyz", "string", "789"));
 
         assertU(commit());
     }
@@ -87,6 +88,24 @@ public class QuerqyExpandQParserPluginTest extends SolrTestCaseJ4 {
 
         assertQ("Multiterm query parses",
                 req,"//str[@name='parsedquery' and text()='DisjunctionMaxQuery((f2_stopwords:a^10.0 | f1_stopwords:a^5.0)) DisjunctionMaxQuery((f2_stopwords:b^10.0 | f1_stopwords:b^5.0))']");
+
+        req.close();
+    }
+
+    @Test
+    public void testBooleanLogic() {
+        SolrQueryRequest req = req(
+                "q", "f1_stopwords:(xyz) string:(123)",
+                "mm", "100",
+                "debug", "true",
+                PARAM_REWRITERS, "common_rules",
+                "defType", "querqyex",
+                "isFreeTextSearch", "true",
+                "spellcheck.q", "xyz 123");
+
+
+        assertQ("Filter expected",
+                req,"//result[@name='response' and @numFound='1']");
 
         req.close();
     }

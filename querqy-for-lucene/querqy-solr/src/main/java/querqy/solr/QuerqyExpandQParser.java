@@ -26,12 +26,14 @@ import querqy.lucene.LuceneQueries;
 import querqy.lucene.LuceneSearchEngineRequestAdapter;
 import querqy.lucene.QueryParsingController;
 import querqy.lucene.rewrite.cache.TermQueryCache;
+import querqy.model.convert.builder.BooleanQueryBuilder;
 import querqy.parser.QuerqyParser;
 import querqy.rewrite.RewriteChain;
 import querqy.rewrite.SearchEngineRequestAdapter;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -52,6 +54,8 @@ public class QuerqyExpandQParser extends QParser {
     protected String parsedQf;
 
     protected LuceneQueries luceneQueries = null;
+    protected List<Query> querqyBypassQueries;
+    protected Set<String> querqyBypassFields;
     protected Query processedQuery = null;
 
     public final static Logger log = LoggerFactory.getLogger(QuerqyExpandQParser.class);
@@ -88,6 +92,12 @@ public class QuerqyExpandQParser extends QParser {
             throw new SolrException(BAD_REQUEST, "Query string must not be empty");
         }
 
+        this.querqyBypassQueries = new LinkedList<>();
+        this.querqyBypassFields = new HashSet<>();
+
+        // Customize bypass fields here
+        this.querqyBypassFields.add("string");
+
         this.querqyParser = querqyParser;
 
         ModifiableSolrParams mutableParams = new ModifiableSolrParams(params);
@@ -98,6 +108,7 @@ public class QuerqyExpandQParser extends QParser {
             extendedDismaxQParser = null;
 
             Map<String, Float> fields = new HighestBoostMap();
+
             ExtendedDismaxQParser parser = new ExtendedDismaxQParser(qstr, localParams, params, req);
             try {
                 Query parsedQuery = parser.parse();
@@ -157,8 +168,16 @@ public class QuerqyExpandQParser extends QParser {
         } else {
             try {
                 luceneQueries = controller.process();
-                processedQuery = maybeWrapQuery(luceneQueries.mainQuery);
+                Query wrappedQuery = maybeWrapQuery(luceneQueries.mainQuery);
 
+                BooleanQuery bq = new BooleanQuery();
+                bq.add(new BooleanClause(wrappedQuery, BooleanClause.Occur.SHOULD));
+                querqyBypassQueries.stream().forEach( (q) -> {
+                    bq.add(new BooleanClause(q, BooleanClause.Occur.SHOULD));
+                });
+
+                bq.setMinimumNumberShouldMatch(0);  // Querqy uses internal minmatch, for the top level we use 0
+                processedQuery = bq;
             } catch (final LuceneSearchEngineRequestAdapter.SyntaxException e) {
                 throw new SyntaxError("Syntax error", e);
             }
@@ -283,6 +302,12 @@ public class QuerqyExpandQParser extends QParser {
                 }
 
                 for (Term term : clauseTerms) {
+                    // Don't add bypass fields
+                    if (querqyBypassFields.contains(term.field())) {
+                        querqyBypassQueries.add(clauseQuery);
+                        break;
+                    }
+
                     fieldsAndBoosts.put(term.field(), clauseQuery.getBoost());
                 }
             }
