@@ -96,7 +96,7 @@ public class QuerqyExpandQParser extends QParser {
         this.querqyBypassFields = new HashSet<>();
 
         // Customize bypass fields here
-        this.querqyBypassFields.add("string");
+        this.querqyBypassFields.add("f3");
 
         this.querqyParser = querqyParser;
 

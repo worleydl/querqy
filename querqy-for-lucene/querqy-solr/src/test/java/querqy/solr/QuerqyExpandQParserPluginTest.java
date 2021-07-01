@@ -42,7 +42,7 @@ public class QuerqyExpandQParserPluginTest extends SolrTestCaseJ4 {
         assertU(adoc("id", "14", "f1_stopwords", "zz", "f2_stopwords", "unfiltered"));
         assertU(adoc("id", "15", "f1_stopwords", "abc", "string", "123"));
         assertU(adoc("id", "16", "f1_stopwords", "abc", "string", "456"));
-        assertU(adoc("id", "17", "f1_stopwords", "xyz", "string", "789"));
+        assertU(adoc("id", "17", "f1_stopwords", "xyz", "f3", "789"));
 
         assertU(commit());
     }
@@ -87,7 +87,7 @@ public class QuerqyExpandQParserPluginTest extends SolrTestCaseJ4 {
         SolrQueryRequest req = req("q", "f1_stopwords:(blah)^5 f2_stopwords:(blah)^10", "debug", "true", "defType", "querqyex", "isFreeTextSearch", "true", "spellcheck.q", "a b");
 
         assertQ("Multiterm query parses",
-                req,"//str[@name='parsedquery' and text()='DisjunctionMaxQuery((f2_stopwords:a^10.0 | f1_stopwords:a^5.0)) DisjunctionMaxQuery((f2_stopwords:b^10.0 | f1_stopwords:b^5.0))']");
+                req,"//str[@name='parsedquery' and text()='(DisjunctionMaxQuery((f2_stopwords:a^10.0 | f1_stopwords:a^5.0)) DisjunctionMaxQuery((f2_stopwords:b^10.0 | f1_stopwords:b^5.0)))']");
 
         req.close();
     }
@@ -95,17 +95,17 @@ public class QuerqyExpandQParserPluginTest extends SolrTestCaseJ4 {
     @Test
     public void testBooleanLogic() {
         SolrQueryRequest req = req(
-                "q", "f1_stopwords:(xyz) string:(123)",
+                "q", "f1_stopwords:(abc) f3:(789)",
                 "mm", "100",
                 "debug", "true",
                 PARAM_REWRITERS, "common_rules",
                 "defType", "querqyex",
                 "isFreeTextSearch", "true",
-                "spellcheck.q", "xyz 123");
+                "spellcheck.q", "abc");
 
 
         assertQ("Filter expected",
-                req,"//result[@name='response' and @numFound='1']");
+                req,"//result[@name='response' and @numFound='3']");
 
         req.close();
     }
@@ -220,7 +220,7 @@ public class QuerqyExpandQParserPluginTest extends SolrTestCaseJ4 {
 
         assertQ("FQ passes thru with negation",
                 req,
-                "//result[@name='response' and @numFound='14']"
+                "//result[@name='response' and @numFound='15']"
         );
 
         req.close();
