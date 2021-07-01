@@ -31,6 +31,7 @@ import querqy.parser.QuerqyParser;
 import querqy.rewrite.RewriteChain;
 import querqy.rewrite.SearchEngineRequestAdapter;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -96,7 +97,10 @@ public class QuerqyExpandQParser extends QParser {
         this.querqyBypassFields = new HashSet<>();
 
         // Customize bypass fields here
-        this.querqyBypassFields.add("f3");
+        String[] bypassElements = params.get("eqf", "").split(",");
+        Arrays.stream(bypassElements).filter( (bypass) -> bypass.length() > 0).forEach( (bypass) -> {
+            this.querqyBypassFields.add(bypass);
+        });
 
         this.querqyParser = querqyParser;
 

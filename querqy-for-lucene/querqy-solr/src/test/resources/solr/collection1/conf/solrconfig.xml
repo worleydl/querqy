@@ -26,6 +26,7 @@
 			<str name="echoParams">all</str>
 			<int name="rows">10</int>
 			<str name="df">id</str>
+			<str name="eqf">f3</str>
 		</lst>
 		<arr name="last-components">
 			<str>spellcheck</str>
